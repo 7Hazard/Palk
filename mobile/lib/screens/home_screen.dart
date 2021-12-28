@@ -66,6 +66,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        // Needed for joining a new group?
+        backgroundColor: Theme.of(context).primaryColor,
+        onPressed: () {},
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Icon(
+          Icons.message_outlined,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }
