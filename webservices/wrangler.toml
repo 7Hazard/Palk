@@ -1,0 +1,14 @@
+name = "palk"
+type = "javascript"
+account_id = "647fa262232a1e9bb6b399360e1af140"
+workers_dev = true
+compatibility_date = "2021-12-27"
+
+[env.production]
+# zone_id = ""
+# route = "palk.7hazard.workers.dev"
+
+[build]
+command = "npm install && npm run build"
+[build.upload]
+format = "service-worker"
