@@ -20,7 +20,7 @@ class _ScanCodeScreenState extends State<ScanCodeScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
-          "New Chat",
+          "Scan Chat Code",
           style: TextStyle(
             fontSize: 28.0,
             fontWeight: FontWeight.bold,
