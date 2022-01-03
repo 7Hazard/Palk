@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
 
+import 'chat_settings.dart';
+
 class ChatScreen extends StatefulWidget {
   final User user;
 
@@ -120,10 +122,16 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0.0,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.more_horiz),
+            icon: Icon(Icons.more_vert),
             iconSize: 30.0,
             color: Colors.white,
-            onPressed: () {},
+            onPressed: () {
+              //open new screen here, put
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatSettings()),
+              );
+            },
           ),
         ],
       ),
