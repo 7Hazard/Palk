@@ -1,10 +1,17 @@
 import { messages } from "./endpoints/messages";
+import { jsonResponse } from "./helpers";
 import { Endpoint } from "./interfaces/Endpoint";
 
+const apiPathPrefix = "/api/v1"
+
 let endpoints: Endpoint[] = [
-  { method: "GET", path: "/", handler: _ => new Response("Lets have a Palk!") },
+  { method: "GET", path: "/", handler: async _ => jsonResponse(endpoints.map(endpoint => endpoint.path.replace(apiPathPrefix, ""))) },
   ...messages
 ]
+
+for (const endpoint of endpoints) {
+  endpoint.path = apiPathPrefix + endpoint.path
+}
 
 addEventListener("fetch", (event) => {
   event.respondWith(
@@ -24,7 +31,7 @@ async function handleRequest(request: Request) {
   const { pathname } = new URL(request.url);
 
   for (const endpoint of endpoints) {
-    if (endpoint.method == request.method && endpoint.path != pathname) continue
+    if (endpoint.method != request.method && endpoint.path != pathname) continue
     return endpoint.handler(request)
   }
 
