@@ -1,0 +1,28 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Open XCode",
+            "type": "shell",
+            "command": "open ios/Runner.xcworkspace",
+            "group": "build"
+        },
+        {
+            "label": "Build iOS",
+            "type": "shell",
+            "command": "flutter build ios",
+            "group": "build"
+        }
+        {
+            "label": "pod install",
+            "type": "shell",
+            "command": "pod install",
+            "options": {
+                "cwd": "ios"
+            },
+            "group": "build"
+        }
+    ]
+}
