@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
 
@@ -14,6 +15,18 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  // static const platform = MethodChannel('solutions.desati.palk/chats');
+  // Future<Map<String, dynamic>> getMessages() async {
+  //   try {
+  //     var json = await platform.invokeMethod('getChats');
+  //     Map<String, dynamic> obj = jsonDecode(json);
+  //     return obj["chats"];
+  //   } on PlatformException catch (e) {
+  //     print("Could not get chats data:\n\t${e}");
+  //     return null;
+  //   }
+  // }
+
   _buildMessage(Message message, bool isMe) {
     final Container msg = Container(
       margin: isMe
@@ -108,6 +121,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Get messages
+    var messages = [];
+
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
