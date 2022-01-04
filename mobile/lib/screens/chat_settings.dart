@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class ChatSettings extends StatefulWidget {
   @override
@@ -22,8 +24,13 @@ class _ChatSettingsState extends State<ChatSettings> {
                 radius: 82,
                 backgroundColor: Colors.grey,
                 child: CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/Fake_QR-Code.png'),
-                  radius: 80,
+                  backgroundColor: Colors.white,
+                  child: QrImage(
+                    data: Uuid().v1(),
+                    version: QrVersions.auto,
+                    size: 100.0, // Determines QR-code size
+                  ),
+                  radius: 200,
                 ),
               ),
             ),
@@ -57,10 +64,17 @@ class _ChatSettingsState extends State<ChatSettings> {
               text: 'Sound',
             ),
             TextButton(
-                child: Text('Leave chat'),
-                onPressed: () {
-                  print('Pressed');
-                })
+              onPressed: () {
+                print('leave chat button pressed');
+              },
+              style: TextButton.styleFrom(
+                primary: Colors.red,
+              ),
+              child: Text(
+                'Leave chat',
+                style: TextStyle(fontSize: 16),
+              ),
+            )
           ]))
         ],
       ),
@@ -77,8 +91,9 @@ class SettingsListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 100,
-      margin: EdgeInsets.symmetric(horizontal: 5).copyWith(bottom: 5),
+      height: 50,
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10)
+          .copyWith(bottom: 0),
       padding: EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
