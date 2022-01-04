@@ -169,14 +169,14 @@ func registerCallHandlers(_ window: UIWindow?) {
         binaryMessenger: controller.binaryMessenger
     )
     messagesChannel.setMethodCallHandler({ (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-        if let args = call.arguments as? Dictionary<String, Any>, let chatid = args["chatid"] as? String {
+        if let chatid = call.arguments as? String {
             do {
                 result(String(data: try Message.allJson(chatid: chatid), encoding: .utf8))
             } catch {
                 result(FlutterError(code: "READERR", message: "Could not read chats data", details: nil))
             }
-          } else {
+        } else {
             result(FlutterError(code: "bad args", message: nil, details: nil))
-          }
+        }
     })
 }

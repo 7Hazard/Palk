@@ -29,12 +29,12 @@ class Message: Codable {
     }
     static func allJson(chatid: String) throws -> Data {
         let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.desati.palk")!
-        let fileURL = dir.appendingPathComponent("chats/\(chatid)")
+        let fileURL = dir.appendingPathComponent("chat-\(chatid)")
         return try Data(contentsOf: fileURL)
     }
     static func saveAll(chatid: String, messages: [Message]) throws {
         let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.desati.palk")!
-        let fileURL = dir.appendingPathComponent("chats/\(chatid)")
+        let fileURL = dir.appendingPathComponent("chat-\(chatid)")
         let data = try JSONEncoder().encode(messages)
         try data.write(to: fileURL)
     }

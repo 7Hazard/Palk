@@ -75,7 +75,7 @@ class NotificationService: UNNotificationServiceExtension {
                     
                     var messages = Message.all(chatid: chatid)
                     messages.append(message)
-                    try? Message.saveAll(chatid: chatid, messages: messages)
+                    try Message.saveAll(chatid: chatid, messages: messages)
                 } catch {
                     bestAttemptContent.title = "Error"
                     bestAttemptContent.body = "Could not decrypt"

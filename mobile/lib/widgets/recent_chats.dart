@@ -42,32 +42,36 @@ class RecentChats extends StatelessWidget {
                     AsyncSnapshot<Map<String, dynamic>> snapshot) {
                   if (snapshot.hasData) {
                     Map<String, dynamic> chats = snapshot.data;
-                    var lastmessages = chats.values.map((chat) {
+                    var lastmessages = chats.map((key, chat) {
                       var lastmsg = chat["lastMessage"];
                       if (lastmsg == null) {
-                        return Message(
-                          sender: User(
-                            id: 0,
-                            name: 'New chat',
-                            imageUrl: 'assets/images/greg.jpg',
-                          ),
-                          time: "",
-                          text: "No messages yet",
-                          unread: false,
-                          isLiked: false,
-                        );
+                        return MapEntry(
+                            key,
+                            Message(
+                              sender: User(
+                                id: 0,
+                                name: 'New chat',
+                                imageUrl: 'assets/images/greg.jpg',
+                              ),
+                              time: "",
+                              text: "No messages yet",
+                              unread: false,
+                              isLiked: false,
+                            ));
                       } else {
-                        return Message(
-                          sender: User(
-                            id: 0,
-                            name: 'Mille',
-                            imageUrl: 'assets/images/greg.jpg',
-                          ),
-                          time: lastmsg["time"],
-                          text: lastmsg["content"],
-                          unread: true,
-                          isLiked: false,
-                        );
+                        return MapEntry(
+                            key,
+                            Message(
+                              sender: User(
+                                id: 0,
+                                name: 'Mille',
+                                imageUrl: 'assets/images/greg.jpg',
+                              ),
+                              time: lastmsg["time"],
+                              text: lastmsg["content"],
+                              unread: true,
+                              isLiked: false,
+                            ));
                       }
                     });
 
@@ -75,12 +79,15 @@ class RecentChats extends StatelessWidget {
                       itemCount: lastmessages.length,
                       itemBuilder: (BuildContext context, int index) {
                         final Message lastmessage =
-                            lastmessages.elementAt(index);
+                            lastmessages.values.elementAt(index);
+                        final String chatid =
+                            lastmessages.keys.elementAt(index);
                         return GestureDetector(
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => ChatScreen(
+                                chatid: chatid,
                                 user: lastmessage.sender,
                               ),
                             ),
