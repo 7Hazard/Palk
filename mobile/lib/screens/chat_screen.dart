@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
 
@@ -6,14 +9,40 @@ import 'chat_settings.dart';
 
 class ChatScreen extends StatefulWidget {
   final User user;
+  final String chatid;
 
-  ChatScreen({this.user});
+  ChatScreen({this.user, this.chatid});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  static const platform = MethodChannel('solutions.desati.palk/messages');
+  Future<List<Message>> getMessages() async {
+    try {
+      String json = await platform.invokeMethod('getMessages', widget.chatid);
+      List<dynamic> jsonlist = jsonDecode(json);
+      var messages = jsonlist
+          .map((msg) => Message(
+                sender: User(
+                  id: 0,
+                  name: 'Mille',
+                  imageUrl: 'assets/images/greg.jpg',
+                ),
+                time: msg["time"],
+                text: msg["content"],
+                unread: true,
+                isLiked: false,
+              ))
+          .toList();
+      return messages;
+    } on PlatformException catch (e) {
+      print("Could not get messages:\n\t${e}");
+      return null;
+    }
+  }
+
   _buildMessage(Message message, bool isMe) {
     final Container msg = Container(
       margin: isMe
@@ -153,14 +182,26 @@ class _ChatScreenState extends State<ChatScreen> {
                     topLeft: Radius.circular(30.0),
                     topRight: Radius.circular(30.0),
                   ),
-                  child: ListView.builder(
-                    reverse: true,
-                    padding: EdgeInsets.only(top: 15.0),
-                    itemCount: messages.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final Message message = messages[index];
-                      final bool isMe = message.sender.id == currentUser.id;
-                      return _buildMessage(message, isMe);
+                  child: FutureBuilder(
+                    future: getMessages(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<Message>> snapshot) {
+                      if (snapshot.hasData) {
+                        var messages = snapshot.data;
+                        return ListView.builder(
+                          reverse: true,
+                          padding: EdgeInsets.only(top: 15.0),
+                          itemCount: messages.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final Message message = messages[index];
+                            final bool isMe =
+                                message.sender.id == currentUser.id;
+                            return _buildMessage(message, isMe);
+                          },
+                        );
+                      } else {
+                        return ListView();
+                      }
                     },
                   ),
                 ),

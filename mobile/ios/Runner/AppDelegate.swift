@@ -1,5 +1,6 @@
 import UIKit
 import Flutter
+import NotificationExtension
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -7,71 +8,63 @@ import Flutter
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        registerCallHandlers(window)
         GeneratedPluginRegistrant.register(with: self)
-        
-        print("Printing chat messages")
-        let chats = Chats.read()
-        for chat in chats.chats {
-            for message in chat.value {
-                print("Message from \(message.from): \(message.content)")
-            }
-        }
-        
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
     
-    override func application(_ application: UIApplication,
-                              didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-                              fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult)
-                              -> Void) {
-        // If you are receiving a notification message while your app is in the background,
-        // this callback will not be fired till the user taps on the notification launching the application.
-        // TODO: Handle data of notification
-        
-        // With swizzling disabled you must let Messaging know about the message, for Analytics
-        // Messaging.messaging().appDidReceiveMessage(userInfo)
-        
-        // Print message ID.
-        //      if let messageID = userInfo[gcmMessageIDKey] {
-        //        print("Message ID: \(messageID)")
-        //      }
-        
-        // Print full message.
-        //    print(userInfo)
-        let kind = userInfo["kind"]! as! String
-        print("Kind: \(kind)")
-        
-        if kind == "message" {
-            let chat = userInfo["chat"]! as! String
-            let sender = userInfo["sender"]! as! String
-            let content = userInfo["content"]! as! String
-            
-            var chats = Chats.read()
-            if chats.chats[chat] == nil { chats.chats[chat] = [] }
-            chats.chats[chat]!.append(Chats.Message(from: sender, content: content))
-            chats.save()
-            
-            print("Message from \(sender): \(content)")
-            
-//            if #available(iOS 10.0, *) {
-//                let content = UNMutableNotificationContent()
-//                content.title = sender
-//                content.subtitle = "Hi"
-//                content.sound = UNNotificationSound.default
-//
-//                // show this notification five seconds from now
-//                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-//
-//                // choose a random identifier
-//                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-//
-//                // add our notification request
-//                UNUserNotificationCenter.current().add(request)
-//            }
-        }
-        
-        completionHandler(UIBackgroundFetchResult.newData)
-    }
+    //    override func application(_ application: UIApplication,
+    //                              didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+    //                              fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult)
+    //                              -> Void) {
+    //        // If you are receiving a notification message while your app is in the background,
+    //        // this callback will not be fired till the user taps on the notification launching the application.
+    //        // TODO: Handle data of notification
+    //
+    //        // With swizzling disabled you must let Messaging know about the message, for Analytics
+    //        // Messaging.messaging().appDidReceiveMessage(userInfo)
+    //
+    //        // Print message ID.
+    //        //      if let messageID = userInfo[gcmMessageIDKey] {
+    //        //        print("Message ID: \(messageID)")
+    //        //      }
+    //
+    //        // Print full message.
+    //        //    print(userInfo)
+    //        let kind = userInfo["kind"]! as! String
+    //        print("Kind: \(kind)")
+    //
+    //        if kind == "message" {
+    //            let chat = userInfo["chat"]! as! String
+    //            let sender = userInfo["sender"]! as! String
+    //            let content = userInfo["content"]! as! String
+    //
+    //            var chats = Chats.read()
+    //            if chats.chats[chat] == nil { chats.chats[chat] = [] }
+    //            chats.chats[chat]!.append(Chats.Message(from: sender, content: content))
+    //            chats.save()
+    //
+    //            print("Message from \(sender): \(content)")
+    //
+    ////            if #available(iOS 10.0, *) {
+    ////                let content = UNMutableNotificationContent()
+    ////                content.title = sender
+    ////                content.subtitle = "Hi"
+    ////                content.sound = UNNotificationSound.default
+    ////
+    ////                // show this notification five seconds from now
+    ////                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+    ////
+    ////                // choose a random identifier
+    ////                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+    ////
+    ////                // add our notification request
+    ////                UNUserNotificationCenter.current().add(request)
+    ////            }
+    //        }
+    //
+    //        completionHandler(UIBackgroundFetchResult.newData)
+    //    }
 }
 
 //@available(iOS 10, *)
@@ -154,73 +147,36 @@ func addLog(line: String) {
     }
 }
 
-struct Users: Codable {
-    struct User: Codable {
-        var name: String
-        var avatar: String // Base64
-    }
+func registerCallHandlers(_ window: UIWindow?) {
+    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     
-    var users: [String:User] = [:]
-    
-    static func read() -> Users {
-        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = dir.appendingPathComponent("chats")
-            do {
-                let data = try Data(contentsOf: fileURL)
-                return try JSONDecoder().decode(Users.self, from: data)
-            }
-            catch {
-                print("Could not read logs file")
-            }
+    // Chats
+    let chatsChannel = FlutterMethodChannel(
+        name: "solutions.desati.palk/chats",
+        binaryMessenger: controller.binaryMessenger
+    )
+    chatsChannel.setMethodCallHandler({ (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+        do {
+            result(String(data: try Chats.json(), encoding: .utf8))
+        } catch {
+            result(FlutterError(code: "READERR", message: "Could not read chats data", details: nil))
         }
-        return Users()
-    }
+    })
     
-    func save() {
-        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = dir.appendingPathComponent("users")
+    // Messages
+    let messagesChannel = FlutterMethodChannel(
+        name: "solutions.desati.palk/messages",
+        binaryMessenger: controller.binaryMessenger
+    )
+    messagesChannel.setMethodCallHandler({ (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+        if let chatid = call.arguments as? String {
             do {
-                let data = try JSONEncoder().encode(self)
-                try data.write(to: fileURL)
+                result(String(data: try Message.allJson(chatid: chatid), encoding: .utf8))
+            } catch {
+                result(FlutterError(code: "READERR", message: "Could not read chats data", details: nil))
             }
-            catch {
-                print("Could not write to users file")
-            }
+        } else {
+            result(FlutterError(code: "bad args", message: nil, details: nil))
         }
-    }
-}
-
-struct Chats: Codable {
-    struct Message: Codable {
-        var from: String
-        var content: String
-    }
-    
-    var chats: [String:[Message]] = [:]
-    
-    static func read() -> Chats {
-        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = dir.appendingPathComponent("chats")
-            do {
-                let data = try Data(contentsOf: fileURL)
-                return try JSONDecoder().decode(Chats.self, from: data)
-            }
-            catch {
-                print("Could not read chats file")
-            }
-        }
-        return Chats()
-    }
-    func save() {
-        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = dir.appendingPathComponent("chats")
-            do {
-                let data = try JSONEncoder().encode(self)
-                try data.write(to: fileURL)
-            }
-            catch {
-                print("Could not write to chats file")
-            }
-        }
-    }
+    })
 }

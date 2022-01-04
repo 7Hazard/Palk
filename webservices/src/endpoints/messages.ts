@@ -5,7 +5,7 @@ export const messages: Endpoint[] = [
     {
         method: "POST", path: "/messages", handler: async req => {
             let json = await req.json<{
-                recipients: string[]
+                chat: string
             }>()
             return jsonResponse(json)
         }
