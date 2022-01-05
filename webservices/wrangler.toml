@@ -4,6 +4,9 @@ account_id = "647fa262232a1e9bb6b399360e1af140"
 workers_dev = true
 compatibility_date = "2021-12-27"
 
+# [secrets]
+# FCM_KEY
+
 [env.production]
 # zone_id = ""
 # route = "palk.7hazard.workers.dev"

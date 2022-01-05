@@ -12,10 +12,9 @@ func decryptMessage(_ key: String, _ message: String) throws -> String {
     let key = SymmetricKey(data: key.data(using: .utf8)!)
     let data = Data(base64Encoded: message)!
 
-    let ivSize = Int(data[0])
-    let nonce = data[1...ivSize] // = initialization vector
-    let tag = data[ivSize+1...ivSize+16]
-    let ciphertext = data[Int(ivSize+17)...]
+    let nonce = data[0...11] // = initialization vector
+    let tag = data[data.count-16...data.count-1]
+    let ciphertext = data[12...data.count-17]
 
     let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonce), ciphertext: ciphertext, tag: tag)
 
@@ -49,7 +48,7 @@ class NotificationService: UNNotificationServiceExtension {
                     let chats = Chats.read()
                     var chat = chats.chats[chatid]
 
-                    let key = chatid.replacingOccurrences(of: "-", with: "") // TODO get key from storage
+                    let key = chat!.key
                     
                     // tmp in future chats will be guaranteed to exist
                     if chat == nil {
