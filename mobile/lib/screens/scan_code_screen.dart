@@ -30,9 +30,18 @@ class _ScanCodeScreenState extends State<ScanCodeScreen> {
       ),
       body: QRView(
         key: qrKey,
+        overlay: QrScannerOverlayShape(
+          cutOutSize: MediaQuery.of(context).size.width * 0.8,
+          borderColor: Colors.green,
+          borderRadius: 10.0,
+          borderLength: 20.0,
+          borderWidth: 10.0,
+        ),
         onQRViewCreated: (QRViewController controller) {
           print("QR View created");
+
           controller.scannedDataStream.listen((scanData) {
+            print('Milan');
             print(scanData);
           });
         },
