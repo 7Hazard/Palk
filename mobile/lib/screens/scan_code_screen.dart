@@ -3,6 +3,8 @@ import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
+import 'chat_settings.dart';
+
 class ScanCodeScreen extends StatefulWidget {
   ScanCodeScreen();
 
@@ -39,10 +41,12 @@ class _ScanCodeScreenState extends State<ScanCodeScreen> {
         ),
         onQRViewCreated: (QRViewController controller) {
           print("QR View created");
-
           controller.scannedDataStream.listen((scanData) {
-            print('Milan');
+            //triggered when QR-code is detected
             print(scanData);
+            controller.stopCamera();
+            controller.dispose();
+            Navigator.pop(context);
           });
         },
       ),
