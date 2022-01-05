@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
 import 'package:flutter_chat_ui/screens/chat_screen.dart';
@@ -9,14 +11,34 @@ import 'package:flutter_chat_ui/screens/chat_screen.dart';
 class RecentChats extends StatelessWidget {
   static const platform = MethodChannel('solutions.desati.palk/chats');
 
-  Future<Map<String, dynamic>> getChats() async {
+  Future<List<Chat>> getChats() async {
     try {
       var json = await platform.invokeMethod('getChats');
-      Map<String, dynamic> obj = jsonDecode(json);
-      return obj["chats"];
+      Map<String, dynamic> obj = jsonDecode(json)["chats"];
+      return obj.values
+          .map((value) => Chat(
+              id: value["id"],
+              key: value["key"],
+              lastMessage: value["lastMessage"] != null
+                  ? Message(
+                      text: value["lastMessage"]["content"],
+                      time: DateTime.parse(value["lastMessage"]["time"]),
+                      sender: User(
+                        id: 0,
+                        name: 'Mille',
+                        imageUrl: 'assets/images/greg.jpg',
+                      ),
+                      isLiked: false,
+                      unread: true,
+                    )
+                  : null))
+          .toList();
     } on PlatformException catch (e) {
       print("Could not get chats data:\n\t${e}");
-      return null;
+      return [];
+    } on Error catch (e) {
+      print("Error parsing chats:\n\t${e}");
+      return [];
     }
   }
 
@@ -36,60 +58,35 @@ class RecentChats extends StatelessWidget {
               topLeft: Radius.circular(30.0),
               topRight: Radius.circular(30.0),
             ),
-            child: FutureBuilder<Map<String, dynamic>>(
+            child: FutureBuilder(
                 future: getChats(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<Map<String, dynamic>> snapshot) {
+                builder:
+                    (BuildContext context, AsyncSnapshot<List<Chat>> snapshot) {
                   if (snapshot.hasData) {
-                    Map<String, dynamic> chats = snapshot.data;
-                    var lastmessages = chats.map((key, chat) {
-                      var lastmsg = chat["lastMessage"];
-                      if (lastmsg == null) {
-                        return MapEntry(
-                            key,
-                            Message(
-                              sender: User(
-                                id: 0,
-                                name: 'New chat',
-                                imageUrl: 'assets/images/greg.jpg',
-                              ),
-                              time: "",
-                              text: "No messages yet",
-                              unread: false,
-                              isLiked: false,
-                            ));
-                      } else {
-                        return MapEntry(
-                            key,
-                            Message(
-                              sender: User(
-                                id: 0,
-                                name: 'Mille',
-                                imageUrl: 'assets/images/greg.jpg',
-                              ),
-                              time: lastmsg["time"],
-                              text: lastmsg["content"],
-                              unread: true,
-                              isLiked: false,
-                            ));
-                      }
-                    });
-
+                    var chats = snapshot.data;
                     return ListView.builder(
-                      itemCount: lastmessages.length,
+                      itemCount: chats.length,
                       itemBuilder: (BuildContext context, int index) {
-                        final Message lastmessage =
-                            lastmessages.values.elementAt(index);
-                        final String chatid =
-                            lastmessages.keys.elementAt(index);
+                        var chat = chats[index];
+
+                        FirebaseMessaging.instance.subscribeToTopic(chat.id); // TEMP
+
+                        var lastmessage = chat.lastMessage != null ? chat.lastMessage : Message(
+                          sender: User(
+                            id: 0,
+                            name: 'Mille',
+                            imageUrl: 'assets/images/greg.jpg',
+                          ),
+                          text: "No messages yet",
+                          time: DateTime.now(),
+                          isLiked: false,
+                          unread: false
+                        );
                         return GestureDetector(
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => ChatScreen(
-                                chatid: chatid,
-                                user: lastmessage.sender,
-                              ),
+                              builder: (_) => ChatScreen(chat: chat),
                             ),
                           ),
                           child: Container(
@@ -147,7 +144,7 @@ class RecentChats extends StatelessWidget {
                                 Column(
                                   children: <Widget>[
                                     Text(
-                                      lastmessage.time,
+                                      lastmessage.time.toString(),
                                       style: TextStyle(
                                         color: Colors.grey,
                                         fontSize: 15.0,
