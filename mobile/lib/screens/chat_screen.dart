@@ -1,17 +1,52 @@
+import 'dart:convert';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
+import 'package:cryptography/cryptography.dart';
+import 'package:http/http.dart' as http;
+
+import 'chat_settings.dart';
 
 class ChatScreen extends StatefulWidget {
-  final User user;
+  final Chat chat;
 
-  ChatScreen({this.user});
+  ChatScreen({this.chat});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  static const platform = MethodChannel('solutions.desati.palk/messages');
+  Future<List<Message>> getMessages() async {
+    try {
+      String json = await platform.invokeMethod('getMessages', widget.chat.id);
+      List<dynamic> jsonlist = jsonDecode(json);
+      var messages = jsonlist
+          .map((msg) => Message(
+                sender: User(
+                  id: 0,
+                  name: 'Mille',
+                  imageUrl: 'assets/images/greg.jpg',
+                ),
+                time: DateTime.parse(msg["time"]),
+                text: msg["content"],
+                unread: true,
+                isLiked: false,
+              ))
+          .toList();
+      messages.sort((a, b) => b.time.compareTo(a.time));
+      return messages;
+    } on PlatformException catch (e) {
+      print("Could not get messages:\n\t${e}");
+      return null;
+    }
+  }
+
   _buildMessage(Message message, bool isMe) {
     final Container msg = Container(
       margin: isMe
@@ -42,7 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            message.time,
+            message.time.toString(),
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 16.0,
@@ -72,9 +107,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   _buildMessageComposer() {
+    var textController = TextEditingController();
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
-      height: 70.0,
+      height: 80.0,
       color: Colors.white,
       child: Row(
         children: <Widget>[
@@ -86,6 +123,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           Expanded(
             child: TextField(
+              controller: textController,
               textCapitalization: TextCapitalization.sentences,
               onChanged: (value) {},
               decoration: InputDecoration.collapsed(
@@ -97,11 +135,44 @@ class _ChatScreenState extends State<ChatScreen> {
             icon: Icon(Icons.send),
             iconSize: 25.0,
             color: Theme.of(context).primaryColor,
-            onPressed: () {},
+            onPressed: () {
+              sendMessage(textController.text);
+              textController.clear();
+            },
           ),
         ],
       ),
     );
+  }
+
+  Future<bool> sendMessage(String message) async {
+    final algorithm = AesGcm.with256bits();
+    final secretKey =
+        await algorithm.newSecretKeyFromBytes(utf8.encode(widget.chat.key));
+    final nonce = algorithm.newNonce();
+
+    var data = jsonEncode({
+      "content": message,
+      "from": await FirebaseMessaging.instance.getToken(),
+      "name": "Mille",
+      "time": DateTime.now().toUtc().toIso8601String()
+    });
+    print(data);
+
+    // Encrypt
+    final secretBox = await algorithm.encrypt(
+      utf8.encode(data),
+      secretKey: secretKey,
+      nonce: nonce,
+    );
+    var encryptedData = base64Encode(secretBox.concatenation());
+
+    var url = Uri.parse('https://palk.7hazard.workers.dev/messages');
+    var response = await http.post(url,
+        body: jsonEncode({"chat": widget.chat.id, "data": encryptedData}));
+    print(response.body);
+    print(response.statusCode);
+    return response.statusCode == 200;
   }
 
   @override
@@ -111,7 +182,7 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
-          widget.user.name,
+          "Unnamed chat", // TODO if only one participant, show his name
           style: TextStyle(
             fontSize: 28.0,
             fontWeight: FontWeight.bold,
@@ -120,10 +191,16 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0.0,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.more_horiz),
+            icon: Icon(Icons.more_vert),
             iconSize: 30.0,
             color: Colors.white,
-            onPressed: () {},
+            onPressed: () {
+              //open new screen here, put
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatSettings()),
+              );
+            },
           ),
         ],
       ),
@@ -145,14 +222,26 @@ class _ChatScreenState extends State<ChatScreen> {
                     topLeft: Radius.circular(30.0),
                     topRight: Radius.circular(30.0),
                   ),
-                  child: ListView.builder(
-                    reverse: true,
-                    padding: EdgeInsets.only(top: 15.0),
-                    itemCount: messages.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final Message message = messages[index];
-                      final bool isMe = message.sender.id == currentUser.id;
-                      return _buildMessage(message, isMe);
+                  child: FutureBuilder(
+                    future: getMessages(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<Message>> snapshot) {
+                      if (snapshot.hasData) {
+                        var messages = snapshot.data;
+                        return ListView.builder(
+                          reverse: true,
+                          padding: EdgeInsets.only(top: 15.0),
+                          itemCount: messages.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final Message message = messages[index];
+                            final bool isMe =
+                                message.sender.id == currentUser.id;
+                            return _buildMessage(message, isMe);
+                          },
+                        );
+                      } else {
+                        return ListView();
+                      }
                     },
                   ),
                 ),
