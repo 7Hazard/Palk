@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
+import 'package:flutter_chat_ui/platform.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -14,6 +16,10 @@ class NewChatScreen extends StatefulWidget {
 class _NewChatScreenState extends State<NewChatScreen> {
   @override
   Widget build(BuildContext context) {
+    var id = Uuid().v1();
+    var key = id.replaceAll("-", "");
+    addChat(id, key);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -33,7 +39,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
         children: [
           Center(
             child: QrImage(
-              data: Uuid().v1(),
+              data: "palk://chat?id=${id}&key=${key}",
               version: QrVersions.auto,
               size: 200.0, // Determines QR-code size
             ),
