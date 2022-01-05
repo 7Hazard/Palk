@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class NewChatScreen extends StatefulWidget {
   NewChatScreen();
@@ -25,8 +27,20 @@ class _NewChatScreenState extends State<NewChatScreen> {
         ),
         elevation: 0.0,
       ),
-      body: Center(
-        child: Text("QR Code Here"),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Center(
+            child: QrImage(
+              data: Uuid().v1(),
+              version: QrVersions.auto,
+              size: 200.0, // Determines QR-code size
+            ),
+          ),
+          Padding(padding: EdgeInsets.all(50)),
+          Text('Scan QR-code with camera to create a new chat.')
+        ],
       ),
     );
   }
