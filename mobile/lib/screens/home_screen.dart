@@ -94,7 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
             FloatingActionButton(
               backgroundColor: Theme.of(context).primaryColor,
               onPressed: () {
-                print("Scan Code");
                 Navigator.push(
                   context,
                   MaterialPageRoute(

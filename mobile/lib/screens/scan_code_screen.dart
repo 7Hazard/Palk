@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/models/message_model.dart';
-import 'package:flutter_chat_ui/models/user_model.dart';
+import 'package:flutter_chat_ui/platform.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 import 'chat_settings.dart';
@@ -42,11 +41,19 @@ class _ScanCodeScreenState extends State<ScanCodeScreen> {
         onQRViewCreated: (QRViewController controller) {
           print("QR View created");
           controller.scannedDataStream.listen((scanData) {
-            //triggered when QR-code is detected
-            print(scanData);
-            controller.stopCamera();
-            controller.dispose();
-            Navigator.pop(context);
+            controller.pauseCamera();
+            RegExp exp = RegExp(r"palk:\/\/chat\?id=(.*.)&key=(.*)");
+            var match = exp.matchAsPrefix(scanData.code);
+            if(match != null) {
+              var id = match.group(1);
+              var key = match.group(2);
+              addChat(id, key);
+              controller.stopCamera();
+              controller.dispose();
+              Navigator.pop(context);
+            } else {
+              controller.resumeCamera();
+            }
           });
         },
       ),

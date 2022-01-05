@@ -1,47 +1,13 @@
-import 'dart:convert';
-
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
 import 'package:flutter_chat_ui/screens/chat_screen.dart';
 
+import '../platform.dart';
+
 class RecentChats extends StatelessWidget {
-  static const platform = MethodChannel('solutions.desati.palk/chats');
-
-  Future<List<Chat>> getChats() async {
-    try {
-      var json = await platform.invokeMethod('getChats');
-      Map<String, dynamic> obj = jsonDecode(json)["chats"];
-      return obj.values
-          .map((value) => Chat(
-              id: value["id"],
-              key: value["key"],
-              lastMessage: value["lastMessage"] != null
-                  ? Message(
-                      text: value["lastMessage"]["content"],
-                      time: DateTime.parse(value["lastMessage"]["time"]),
-                      sender: User(
-                        id: 0,
-                        name: 'Mille',
-                        imageUrl: 'assets/images/greg.jpg',
-                      ),
-                      isLiked: false,
-                      unread: true,
-                    )
-                  : null))
-          .toList();
-    } on PlatformException catch (e) {
-      print("Could not get chats data:\n\t${e}");
-      return [];
-    } on Error catch (e) {
-      print("Error parsing chats:\n\t${e}");
-      return [];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Expanded(

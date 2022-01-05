@@ -156,10 +156,29 @@ func registerCallHandlers(_ window: UIWindow?) {
         binaryMessenger: controller.binaryMessenger
     )
     chatsChannel.setMethodCallHandler({ (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-        do {
-            result(String(data: try Chats.json(), encoding: .utf8))
-        } catch {
-            result(FlutterError(code: "READERR", message: "Could not read chats data", details: nil))
+        if(call.method == "get") {
+            do {
+                result(String(data: try Chats.json(), encoding: .utf8))
+            } catch {
+                result(FlutterError(code: "READERR", message: "Could not read chats data", details: nil))
+            }
+        } else if (call.method == "add") {
+            if let args = call.arguments as? Dictionary<String, Any> {
+                if let id = args["id"] as? String, let key = args["key"] as? String {
+                    let chats = Chats.read()
+                    if(chats.chats[id] != nil) {
+                        result(Int(1))
+                    } else {
+                        chats.chats[id] = Chat(id: id, key: key)
+                        chats.save()
+                        result(Int(0))
+                    }
+                } else {
+                    result(FlutterError(code: "bad args", message: nil, details: nil))
+                }
+            } else {
+                result(FlutterError(code: "unknown method", message: nil, details: nil))
+            }
         }
     })
     
