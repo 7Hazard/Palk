@@ -79,7 +79,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(
                     builder: (_) => NewChatScreen(),
                   ),
-                );
+                ).then((value) {
+                  setState(() {
+                    print('updated homescreen');
+                    RecentChats();
+                  });
+                });
               },
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15)),
