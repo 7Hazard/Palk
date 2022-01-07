@@ -5,8 +5,6 @@ import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
 import 'package:flutter_chat_ui/screens/chat_screen.dart';
 
-import '../platform.dart';
-
 class RecentChats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -25,7 +23,7 @@ class RecentChats extends StatelessWidget {
               topRight: Radius.circular(30.0),
             ),
             child: FutureBuilder(
-                future: getChats(),
+                future: Chat.getAll(),
                 builder:
                     (BuildContext context, AsyncSnapshot<List<Chat>> snapshot) {
                   if (snapshot.hasData) {
@@ -34,7 +32,7 @@ class RecentChats extends StatelessWidget {
                       itemCount: chats.length,
                       itemBuilder: (BuildContext context, int index) {
                         var chat = chats[index];
-
+                        
                         FirebaseMessaging.instance.subscribeToTopic(chat.id); // TEMP
 
                         var lastmessage = chat.lastMessage != null ? chat.lastMessage : Message(

@@ -73,7 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
             FloatingActionButton(
               backgroundColor: Theme.of(context).primaryColor,
               onPressed: () {
-                print("New Chat");
                 Navigator.push(
                   context,
                   MaterialPageRoute(

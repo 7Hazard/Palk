@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/platform.dart';
+import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-
-import 'chat_settings.dart';
 
 class ScanCodeScreen extends StatefulWidget {
   ScanCodeScreen();
@@ -47,7 +45,7 @@ class _ScanCodeScreenState extends State<ScanCodeScreen> {
             if(match != null) {
               var id = match.group(1);
               var key = match.group(2);
-              addChat(id, key);
+              Chat.add(id, key);
               controller.stopCamera();
               controller.dispose();
               Navigator.pop(context);
