@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/screens/new_chat_screen.dart';
+import 'package:flutter_chat_ui/screens/profile_settings_screen.dart';
 import 'package:flutter_chat_ui/screens/scan_code_screen.dart';
 import 'package:flutter_chat_ui/widgets/category_selector.dart';
 import 'package:flutter_chat_ui/widgets/recent_chats.dart';
@@ -17,19 +18,25 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).primaryColor,
           leading: IconButton(
-            icon: Icon(Icons.menu),
+            icon: Icon(Icons.account_circle_outlined),
             iconSize: 30.0,
             color: Colors.white,
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileSettings()),
+              );
+            },
           ),
           title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(
+            Center(
+                child: Text(
               'Palk ',
               style: TextStyle(
                 fontFamily: 'OpenSansBold',
                 fontSize: 26.0,
               ),
-            ),
+            )),
             Image.asset(
               'assets/images/palk_icon.png',
               height: 25,
@@ -37,14 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           ]),
           elevation: 0.0,
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.search),
-              iconSize: 30.0,
-              color: Colors.white,
-              onPressed: () {},
-            ),
-          ],
         ),
         body: Column(
           children: <Widget>[

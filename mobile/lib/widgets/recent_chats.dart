@@ -4,6 +4,7 @@ import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/message_model.dart';
 import 'package:flutter_chat_ui/models/user_model.dart';
 import 'package:flutter_chat_ui/screens/chat_screen.dart';
+import 'package:intl/intl.dart';
 
 import '../platform.dart';
 
@@ -37,6 +38,9 @@ class RecentChats extends StatelessWidget {
                         ),
                       );
                     } else {
+                      //chats.sort((a, b) {
+                      //return a.lastMessage.time.compareTo(b.lastMessage.time);
+                      //});
                       return ListView.builder(
                         itemCount: chats.length,
                         itemBuilder: (BuildContext context, int index) {
@@ -120,7 +124,9 @@ class RecentChats extends StatelessWidget {
                                   Column(
                                     children: <Widget>[
                                       Text(
-                                        lastmessage.time.toString(),
+                                        DateFormat("yyyy-MM-dd").format(
+                                            DateTime.parse(
+                                                lastmessage.time.toString())),
                                         style: TextStyle(
                                           color: Colors.grey,
                                           fontSize: 15.0,

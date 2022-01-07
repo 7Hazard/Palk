@@ -1,4 +1,3 @@
-
 import 'message_model.dart';
 
 class Chat {
@@ -6,9 +5,5 @@ class Chat {
   final String key;
   final Message lastMessage;
 
-  Chat({
-    this.id,
-    this.key,
-    this.lastMessage
-  });
+  Chat({this.id, this.key, this.lastMessage});
 }
