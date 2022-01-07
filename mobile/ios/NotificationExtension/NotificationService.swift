@@ -6,21 +6,6 @@
 //
 
 import UserNotifications
-import CryptoKit
-
-func decryptMessage(_ key: String, _ message: String) throws -> String {
-    let key = SymmetricKey(data: key.data(using: .utf8)!)
-    let data = Data(base64Encoded: message)!
-
-    let nonce = data[0...11] // = initialization vector
-    let tag = data[data.count-16...data.count-1]
-    let ciphertext = data[12...data.count-17]
-
-    let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonce), ciphertext: ciphertext, tag: tag)
-
-    let decryptedData = try AES.GCM.open(sealedBox, using: key)
-    return String(decoding: decryptedData, as: UTF8.self)
-}
 
 class NotificationService: UNNotificationServiceExtension {
     
@@ -70,6 +55,7 @@ class NotificationService: UNNotificationServiceExtension {
 
                     let message = Message(from: data.from, content: data.content, time: data.time)
                     chat?.lastMessage = message
+                    chat?.lastUpdate = message.time
                     chats.save()
                     
                     var messages = Message.all(chatid: chatid)

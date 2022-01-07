@@ -157,7 +157,6 @@ class _ChatScreenState extends State<ChatScreen> {
       "name": "Mille",
       "time": DateTime.now().toUtc().toIso8601String()
     });
-    print(data);
 
     // Encrypt
     final secretBox = await algorithm.encrypt(
@@ -170,8 +169,6 @@ class _ChatScreenState extends State<ChatScreen> {
     var url = Uri.parse('https://palk.7hazard.workers.dev/messages');
     var response = await http.post(url,
         body: jsonEncode({"chat": widget.chat.id, "data": encryptedData}));
-    print(response.body);
-    print(response.statusCode);
     return response.statusCode == 200;
   }
 

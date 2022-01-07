@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import CryptoKit
+import Flutter
 
 class Message: Codable {
     var from: String
@@ -38,4 +40,37 @@ class Message: Codable {
         let data = try JSONEncoder().encode(messages)
         try data.write(to: fileURL)
     }
+    
+    static var channel: FlutterMethodChannel?
+    static func registerChannel(_ binaryMessenger: FlutterBinaryMessenger) {
+        channel = FlutterMethodChannel(
+            name: "solutions.desati.palk/messages",
+            binaryMessenger: binaryMessenger
+        )
+        channel!.setMethodCallHandler({ (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+            if let chatid = call.arguments as? String {
+                do {
+                    result(String(data: try Message.allJson(chatid: chatid), encoding: .utf8))
+                } catch {
+                    result(FlutterError(code: "READERR", message: "Could not read chats data", details: nil))
+                }
+            } else {
+                result(FlutterError(code: "bad args", message: nil, details: nil))
+            }
+        })
+    }
+}
+
+func decryptMessage(_ key: String, _ message: String) throws -> String {
+    let key = SymmetricKey(data: key.data(using: .utf8)!)
+    let data = Data(base64Encoded: message)!
+
+    let nonce = data[0...11] // = initialization vector
+    let tag = data[data.count-16...data.count-1]
+    let ciphertext = data[12...data.count-17]
+
+    let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonce), ciphertext: ciphertext, tag: tag)
+
+    let decryptedData = try AES.GCM.open(sealedBox, using: key)
+    return String(decoding: decryptedData, as: UTF8.self)
 }

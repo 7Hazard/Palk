@@ -6,8 +6,6 @@ import 'package:flutter_chat_ui/models/user_model.dart';
 import 'package:flutter_chat_ui/screens/chat_screen.dart';
 import 'package:intl/intl.dart';
 
-import '../platform.dart';
-
 class RecentChats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -26,7 +24,7 @@ class RecentChats extends StatelessWidget {
               topRight: Radius.circular(30.0),
             ),
             child: FutureBuilder(
-                future: getChats(),
+                future: Chat.getAll(),
                 builder:
                     (BuildContext context, AsyncSnapshot<List<Chat>> snapshot) {
                   if (snapshot.hasData) {

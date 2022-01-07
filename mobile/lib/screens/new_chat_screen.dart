@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
-import 'package:flutter_chat_ui/models/message_model.dart';
-import 'package:flutter_chat_ui/models/user_model.dart';
-import 'package:flutter_chat_ui/platform.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -18,7 +15,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
   Widget build(BuildContext context) {
     var id = Uuid().v1();
     var key = id.replaceAll("-", "");
-    addChat(id, key);
+    Chat.add(id, key);
 
     return Scaffold(
       backgroundColor: Colors.white,
