@@ -157,9 +157,18 @@ class _HomeScreenState extends State<HomeScreen> {
                             )
                           ]);
                     } else {
-                      //chats.sort((a, b) {
-                      //return a.lastMessage.time.compareTo(b.lastMessage.time);
-                      //});
+                      // [a, b, c, null, null]
+                      chats.sort((a, b) {
+                        if (a.lastUpdate == null && b.lastUpdate == null) {
+                          return 0;
+                        } else if (a.lastUpdate == null) {
+                          return 1;
+                        } else if (b.lastUpdate == null) {
+                          return -1;
+                        } else {
+                          return a.lastUpdate.compareTo(b.lastUpdate);
+                        }
+                      });
                       return ListView.builder(
                         itemCount: chats.length,
                         itemBuilder: (BuildContext context, int index) {
