@@ -195,7 +195,10 @@ class _ChatScreenState extends State<ChatScreen> {
               //open new screen here, put
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ChatSettings(chat: widget.chat,)),
+                MaterialPageRoute(
+                    builder: (context) => ChatSettings(
+                          chat: widget.chat,
+                        )),
               );
             },
           ),

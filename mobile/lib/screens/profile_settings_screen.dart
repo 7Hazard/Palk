@@ -7,10 +7,11 @@ class ProfileSettings extends StatefulWidget {
 }
 
 class _ProfileSettingsState extends State<ProfileSettings> {
+  var _username = 'Palk_User';
+  TextEditingController usernameController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    var username = '';
-
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -21,20 +22,52 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           padding: EdgeInsets.only(left: 16, top: 25, right: 16),
           child: Column(
             children: [
-              Text(
-                'Username: Mil3nium',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
-              ),
+              Container(
+                  decoration: BoxDecoration(
+                      color: Colors.black,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black,
+                          spreadRadius: 3,
+                          blurRadius: 20,
+                        )
+                      ],
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                  height: 70,
+                  width: 200,
+                  child: ListTile(
+                      title: Text('Username: ',
+                          style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white)),
+                      subtitle: Text("$_username",
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white)))),
+              Padding(
+                  padding: EdgeInsets.symmetric(
+                vertical: 15.0,
+              )),
               TextField(
+                keyboardType: TextInputType.text,
+                controller: usernameController,
                 decoration: InputDecoration(
                     contentPadding:
                         EdgeInsets.only(left: 16, top: 25, right: 16),
-                    labelText: 'Username',
-                    hintText: 'Enter username...'),
+                    labelText: 'Enter new username here...',
+                    hintText: ' '),
               ),
               Padding(padding: EdgeInsets.only(left: 16, top: 50, right: 16)),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    if (!usernameController.text.isEmpty) {
+                      _username = usernameController.text;
+                    }
+                  });
+                },
                 child: Text(
                   'Save',
                 ),
