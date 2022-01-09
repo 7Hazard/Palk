@@ -65,21 +65,21 @@ class Chats: Codable {
                     result(FlutterError(code: "READERR", message: "Could not read chats data", details: nil))
                 }
             } else if call.method == "add" {
-                if let args = call.arguments as? Dictionary<String, Any> {
-                    if let id = args["id"] as? String, let key = args["key"] as? String {
-                        let chats = Chats.read()
-                        if(chats.chats[id] != nil) {
-                            result(Int(1))
-                        } else {
-                            chats.chats[id] = Chat(id: id, key: key)
-                            chats.save()
-                            result(Int(0))
-                        }
+                if
+                    let args = call.arguments as? Dictionary<String, Any>,
+                    let id = args["id"] as? String,
+                    let key = args["key"] as? String
+                {
+                    let chats = Chats.read()
+                    if(chats.chats[id] != nil) {
+                        result(Int(1))
                     } else {
-                        result(FlutterError(code: "bad args", message: nil, details: nil))
+                        chats.chats[id] = Chat(id: id, key: key)
+                        chats.save()
+                        result(Int(0))
                     }
                 } else {
-                    result(FlutterError(code: "unknown method", message: nil, details: nil))
+                    result(FlutterError(code: "bad args", message: nil, details: nil))
                 }
             } else if call.method == "remove" {
                 if let args = call.arguments as? Dictionary<String, Any> {
@@ -87,6 +87,9 @@ class Chats: Codable {
                         let chats = Chats.read()
                         chats.chats.removeValue(forKey: id)
                         chats.save()
+                        
+                        Message.removeByChatId(id)
+                        
                         result(Int(0))
                     } else {
                         result(FlutterError(code: "bad args", message: nil, details: nil))

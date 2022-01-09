@@ -43,7 +43,7 @@ class NotificationService: UNNotificationServiceExtension {
                     // tmp
                     
                     let encryptedData = bestAttemptContent.userInfo["data"]! as! String
-                    let decryptedContent = try decryptMessage(key, encryptedData)
+                    let decryptedContent = try decryptData(key, encryptedData)
 
                     let data = try JSONDecoder().decode(
                         MessageData.self,

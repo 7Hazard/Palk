@@ -34,7 +34,7 @@ import NotificationExtension
                 let key = chat!.key
                 
                 let encryptedData = userInfo["data"]! as! String
-                Message.channel!.invokeMethod("notification", arguments: try decryptMessage(key, encryptedData))
+                Message.channel!.invokeMethod("notification", arguments: try decryptData(key, encryptedData))
             } catch {
                 print("Error")
             }
