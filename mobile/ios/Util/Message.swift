@@ -40,6 +40,11 @@ class Message: Codable {
         let data = try JSONEncoder().encode(messages)
         try data.write(to: fileURL)
     }
+    static func removeByChatId(_ chatid: String) {
+        let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.desati.palk")!
+        let fileURL = dir.appendingPathComponent("chat-\(chatid)")
+        try? FileManager.default.removeItem(at: fileURL)
+    }
     
     static var channel: FlutterMethodChannel?
     static func registerChannel(_ binaryMessenger: FlutterBinaryMessenger) {
@@ -61,7 +66,7 @@ class Message: Codable {
     }
 }
 
-func decryptMessage(_ key: String, _ message: String) throws -> String {
+func decryptData(_ key: String, _ message: String) throws -> String {
     let key = SymmetricKey(data: key.data(using: .utf8)!)
     let data = Data(base64Encoded: message)!
 

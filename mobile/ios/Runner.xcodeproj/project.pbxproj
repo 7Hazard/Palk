@@ -18,6 +18,8 @@
 		29861E99278416B000F853DE /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E97278416B000F853DE /* Message.swift */; };
 		29861E9B2788C34400F853DE /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E9A2788C34400F853DE /* Extensions.swift */; };
 		29861E9C2788C34400F853DE /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E9A2788C34400F853DE /* Extensions.swift */; };
+		29861E9E278B644B00F853DE /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E9D278B644A00F853DE /* Profile.swift */; };
+		29861E9F278B644B00F853DE /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E9D278B644A00F853DE /* Profile.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		8B6A4C87CE888ADB8D1637DA /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5327905BC02A84C8DE6A4BD0 /* Pods_Runner.framework */; };
@@ -73,6 +75,7 @@
 		29861E932784078600F853DE /* NotificationExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationExtension.entitlements; sourceTree = "<group>"; };
 		29861E97278416B000F853DE /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		29861E9A2788C34400F853DE /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		29861E9D278B644A00F853DE /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		5327905BC02A84C8DE6A4BD0 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		534FDA2F73A8E5B7250EBA99 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
@@ -133,6 +136,7 @@
 				29861E902783E9FD00F853DE /* Users.swift */,
 				29861E97278416B000F853DE /* Message.swift */,
 				29861E9A2788C34400F853DE /* Extensions.swift */,
+				29861E9D278B644A00F853DE /* Profile.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -375,6 +379,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				29861E9C2788C34400F853DE /* Extensions.swift in Sources */,
+				29861E9F278B644B00F853DE /* Profile.swift in Sources */,
 				29861E7F2783646F00F853DE /* NotificationService.swift in Sources */,
 				29861E99278416B000F853DE /* Message.swift in Sources */,
 				29861E922783E9FD00F853DE /* Users.swift in Sources */,
@@ -389,6 +394,7 @@
 				29861E912783E9FD00F853DE /* Users.swift in Sources */,
 				29861E9B2788C34400F853DE /* Extensions.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				29861E9E278B644B00F853DE /* Profile.swift in Sources */,
 				29861E98278416B000F853DE /* Message.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				29861E8E2783E84E00F853DE /* Chats.swift in Sources */,
