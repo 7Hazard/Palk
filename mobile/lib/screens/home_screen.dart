@@ -142,12 +142,12 @@ class _HomeScreenState extends State<HomeScreen> {
               topRight: Radius.circular(30.0),
             ),
             child: FutureBuilder(
-                future: Chat.getAll(),
+                future: Chat.all,
                 builder:
-                    (BuildContext context, AsyncSnapshot<List<Chat>> snapshot) {
+                    (BuildContext context, AsyncSnapshot<Map<String, Chat>> snapshot) {
                   if (snapshot.hasData) {
-                    var chats = snapshot.data;
-                    if (chats.isEmpty) {
+                    var chatsMap = snapshot.data;
+                    if (chatsMap.isEmpty) {
                       return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -157,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             )
                           ]);
                     } else {
+                      var chats = chatsMap.values.toList();
                       // [a, b, c, null, null]
                       chats.sort((a, b) {
                         if (a.lastUpdate == null && b.lastUpdate == null) {
@@ -166,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         } else if (b.lastUpdate == null) {
                           return -1;
                         } else {
-                          return a.lastUpdate.compareTo(b.lastUpdate);
+                          return b.lastUpdate.compareTo(a.lastUpdate);
                         }
                       });
                       return ListView.builder(

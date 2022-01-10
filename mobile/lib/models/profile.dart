@@ -1,7 +1,8 @@
-
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_chat_ui/util.dart';
 
 class Profile {
   final String id;
@@ -14,39 +15,28 @@ class Profile {
     this.avatar,
   });
 
+  static Future<Map<String, Profile>> get all async {
+    try {
+      var json = await read("profiles");
+      Map<String, dynamic> obj = jsonDecode(json)["profiles"];
+      Map<String, Profile> profiles = {};
+      obj.forEach((key, value) {
+        profiles[key] = Profile(id: value["id"], name: value["name"]);
+      });
+      return profiles;
+    } on Error catch (e) {
+      print("Error parsing chats:\n\t${e}");
+      return {};
+    }
+  }
+
   static MethodChannel channel = () {
     var channel = MethodChannel('solutions.desati.palk/profiles');
     return channel;
   }();
 
-  static Future<List<Profile>> getAll() async {
-    try {
-      var json = await channel.invokeMethod('getAll');
-      Map<String, dynamic> obj = jsonDecode(json)["profiles"];
-      return obj.values
-          .map((value) => Profile(
-                id: value["id"],
-                name: value["name"]
-              ))
-          .toList();
-    } on PlatformException catch (e) {
-      print("Could not get chats data:\n\t${e}");
-      return [];
-    } on Error catch (e) {
-      print("Error parsing chats:\n\t${e}");
-      return [];
-    }
-  }
-
   static Future<Profile> get(String id) async {
-    try {
-      var json = await channel.invokeMethod('get', {"id": id});
-      dynamic obj = jsonDecode(json);
-      return Profile(id: obj["id"], name: obj["name"]);
-    } on Error catch (e) {
-      print("Error parsing profile:\n\t${e}");
-      return null;
-    }
+    return (await all)[id];
   }
 
   static Future<Profile> set(String id, String name) async {
@@ -66,6 +56,15 @@ class Profile {
     } catch (e) {
       print(e);
       return null;
+    }
+  }
+
+  static Profile current;
+  static void setCurrent() async {
+    current = await get(await FirebaseMessaging.instance.getToken());
+    if (current == null) {
+      print("PROFILE IS NULL");
+      // TODO init
     }
   }
 }

@@ -12,6 +12,7 @@ import NotificationExtension
         Message.registerChannel(messanger)
         Chats.registerChannel(messanger)
         Profiles.registerChannel(messanger)
+        Util.registerChannel(messanger)
         
         GeneratedPluginRegistrant.register(with: self)
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -40,6 +41,10 @@ import NotificationExtension
         } catch {
             print("Error")
         }
+        
+        var data: [String:Any] = [:]
+        userInfo.forEach { data[$0 as! String] = $1 }
+        Util.channel?.invokeMethod("notification", arguments: data)
         
         completionHandler(UIBackgroundFetchResult.newData)
     }

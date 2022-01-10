@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/message.dart';
+import 'package:flutter_chat_ui/models/profile.dart';
 
 import 'chat_settings.dart';
 
@@ -103,7 +104,7 @@ class _ChatScreenState extends State<ChatScreen> {
             iconSize: 25.0,
             color: Theme.of(context).primaryColor,
             onPressed: () {
-              Message.send(textController.text, widget.chat.id, widget.chat.key);
+              widget.chat.sendMessage(textController.text);
               textController.clear();
             },
           ),
@@ -112,19 +113,22 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  List<Message> messages;
+  Future onMessage(Chat chat, Message message) async {
+    setState(() {
+      messages.add(message);
+    });
+  }
+
   @override
   void dispose() {
-    Chat.onMessage.remove(widget.chat.id);
+    widget.chat.unsubscribeOnMessage(onMessage);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Message> messages;
-    Chat.onMessage[widget.chat.id] = (message) {
-      messages.add(message);
-      setState(() {});
-    };
+    widget.chat.subscribeOnMessage(onMessage);
 
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
@@ -186,7 +190,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           itemCount: messages.length,
                           itemBuilder: (BuildContext context, int index) {
                             final Message message = messages[index];
-                            final bool isMe = message.sender.id == currentUser.id;
+                            final bool isMe = message.sender.id == Profile.current.id;
                             return _buildMessage(message, isMe);
                           },
                         );
