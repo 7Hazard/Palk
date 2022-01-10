@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
-import 'package:flutter_chat_ui/models/message.dart';
 
 Future<String> read(String key) async {
   return await channel.invokeMethod("read", {"key": key});

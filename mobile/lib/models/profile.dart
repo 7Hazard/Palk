@@ -1,33 +1,22 @@
+import 'dart:collection';
 import 'dart:convert';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/util.dart';
 
 class Profile {
   final String id;
-  final String name;
-  final String avatar;
+  String name;
+  String avatar;
 
-  Profile({
-    this.id,
-    this.name,
-    this.avatar,
-  });
+  Profile(this.id, [this.name, this.avatar]);
 
-  static Future<Map<String, Profile>> get all async {
-    try {
-      var json = await read("profiles");
-      Map<String, dynamic> obj = jsonDecode(json)["profiles"];
-      Map<String, Profile> profiles = {};
-      obj.forEach((key, value) {
-        profiles[key] = Profile(id: value["id"], name: value["name"]);
-      });
-      return profiles;
-    } on Error catch (e) {
-      print("Error parsing chats:\n\t${e}");
-      return {};
+  String nameOrDefault({String def}) {
+    if (name == null) {
+      if (def == null) return id.substring(id.length - 10);
+      else return def;
     }
+    else return name;
   }
 
   static MethodChannel channel = () {
@@ -35,36 +24,42 @@ class Profile {
     return channel;
   }();
 
-  static Future<Profile> get(String id) async {
-    return (await all)[id];
+  static Map<String, Profile> cache = HashMap();
+  static Future<Profile> get(String id, {Profile defaultProfile: null, bool createIfNotExists: false}) async {
+    if(id == null) {
+      if(defaultProfile == null) throw "ID cannot be null";
+      else return defaultProfile;
+    }
+    Profile profile = cache[id];
+    if (profile == null) {
+      try {
+        var json = jsonDecode(await read("profile-${id}"));
+        profile =
+            Profile(json["id"], json["name"], json["avatar"]);
+      } catch (e) {
+        if (createIfNotExists) {
+          profile = Profile(id);
+          await profile.save();
+        } else if (defaultProfile != null) {
+          profile = defaultProfile;
+        }
+        print("No profile by id '${id}'");
+      }
+    }
+    return profile;
+  }
+  
+  static Profile current = null;
+
+  void save() async {
+    await write("profile-${id}", json);
   }
 
-  static Future<Profile> set(String id, String name) async {
-    try {
-      int status = await channel.invokeMethod('set', {"id": id, "name": name});
-      return Profile(id: id, name: name);
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  static Future<int> remove(String id) async {
-    try {
-      int status = await channel.invokeMethod('remove', {"id": id});
-      return status;
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  static Profile current;
-  static void setCurrent() async {
-    current = await get(await FirebaseMessaging.instance.getToken());
-    if (current == null) {
-      print("PROFILE IS NULL");
-      // TODO init
-    }
+  String get json {
+    return jsonEncode({
+      "id": id,
+      "name": name,
+      "avatar": avatar,
+    });
   }
 }

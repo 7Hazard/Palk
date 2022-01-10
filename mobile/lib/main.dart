@@ -8,7 +8,7 @@ import 'models/profile.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await initFirebase();
 
   runApp(MyApp());
@@ -59,6 +59,6 @@ void initFirebase() async {
 
     String token = await messaging.getToken();
     print('FCM token: ${token}');
-    await Profile.setCurrent();
+    Profile.current = await Profile.get(token, createIfNotExists: true);
   }
 }

@@ -30,25 +30,23 @@ class Chat {
     return channel;
   }();
 
+  static Map<String, Chat> cache;
   static Future<Map<String, Chat>> get all async {
+    if (cache != null) return cache;
     try {
-      // var json = await channel.invokeMethod('get');
       var json = await read("chats");
       Map<String, dynamic> obj = jsonDecode(json)["chats"];
-      var chats = HashMap<String, Chat>();
-      obj.forEach((key, value) {
-        chats[key] = Chat(
+      var cache = HashMap<String, Chat>();
+      obj.forEach((key, value) async {
+        cache[key] = Chat(
           id: value["id"],
           key: value["key"],
           lastMessage: value["lastMessage"] != null
               ? Message(
                   text: value["lastMessage"]["content"],
                   time: DateTime.parse(value["lastMessage"]["time"]),
-                  sender: Profile(
-                    id: "",
-                    name: 'Mille',
-                    avatar: 'assets/images/greg.jpg',
-                  ),
+                  sender: await Profile.get(value["lastMessage"]["from"],
+                      createIfNotExists: true),
                   isLiked: false,
                   unread: true,
                 )
@@ -58,7 +56,7 @@ class Chat {
               : null,
         );
       });
-      return chats;
+      return cache;
     } on Error catch (e) {
       print("Error parsing chats:\n\t${e}");
       return {};
@@ -102,6 +100,7 @@ class Chat {
     final secretKey = await algorithm.newSecretKeyFromBytes(utf8.encode(key));
     final nonce = algorithm.newNonce();
 
+    print("Profile.current.name: ${Profile.current.name}");
     var data = jsonEncode({
       "content": message,
       "from": Profile.current.id,

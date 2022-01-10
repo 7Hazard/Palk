@@ -19,51 +19,6 @@ class Message: Codable {
         self.content = content
         self.time = time
     }
-    
-    static func all(chatid: String) -> [Message] {
-        do {
-            return try JSONDecoder().decode([Message].self, from: try allJson(chatid: chatid))
-        }
-        catch {
-            print("Could not read messages")
-            return []
-        }
-    }
-    static func allJson(chatid: String) throws -> Data {
-        let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.desati.palk")!
-        let fileURL = dir.appendingPathComponent("chat-\(chatid)")
-        return try Data(contentsOf: fileURL)
-    }
-    static func saveAll(chatid: String, messages: [Message]) throws {
-        let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.desati.palk")!
-        let fileURL = dir.appendingPathComponent("chat-\(chatid)")
-        let data = try JSONEncoder().encode(messages)
-        try data.write(to: fileURL)
-    }
-    static func removeByChatId(_ chatid: String) {
-        let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.desati.palk")!
-        let fileURL = dir.appendingPathComponent("chat-\(chatid)")
-        try? FileManager.default.removeItem(at: fileURL)
-    }
-    
-    static var channel: FlutterMethodChannel?
-    static func registerChannel(_ binaryMessenger: FlutterBinaryMessenger) {
-        channel = FlutterMethodChannel(
-            name: "solutions.desati.palk/messages",
-            binaryMessenger: binaryMessenger
-        )
-        channel!.setMethodCallHandler({ (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-            if let chatid = call.arguments as? String {
-                do {
-                    result(String(data: try Message.allJson(chatid: chatid), encoding: .utf8))
-                } catch {
-                    result(FlutterError(code: "READERR", message: "Could not read chats data", details: nil))
-                }
-            } else {
-                result(FlutterError(code: "bad args", message: nil, details: nil))
-            }
-        })
-    }
 }
 
 func decryptData(_ key: String, _ message: String) throws -> String {

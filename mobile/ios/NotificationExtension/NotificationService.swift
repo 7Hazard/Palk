@@ -50,19 +50,14 @@ class NotificationService: UNNotificationServiceExtension {
                         from: decryptedContent.data(using: .utf8)!
                     )
                     
-                    // Get user, apply differences
-                    let profiles = Profiles.read()
-                    var profile = profiles.profiles[data.from]
-                    if profile == nil {
-                        profile = Profile(id: data.from)
-                    }
+                    // Get profile, apply differences
+                    let profile = try Profile.read(data.from) ?? Profile(id: data.from)
                     if let name = data.name {
-                        profile!.name = name
+                        profile.name = name
                     }
-                    profiles.profiles[profile!.id] = profile
-                    profiles.save()
+                    profile.save()
                     
-                    bestAttemptContent.title = profile!.name ?? "Unnamed"
+                    bestAttemptContent.title = profile.name ?? String(profile.id.suffix(10))
                     bestAttemptContent.body = data.content
 
                     let message = Message(from: data.from, content: data.content, time: data.time)
@@ -70,9 +65,9 @@ class NotificationService: UNNotificationServiceExtension {
                     chat?.lastUpdate = message.time
                     chats.save()
                     
-                    var messages = Message.all(chatid: chatid)
+                    var messages = try JSONDecoder().decode([Message].self, from: try Util.read("chat-\(chatid)"))
                     messages.append(message)
-                    try Message.saveAll(chatid: chatid, messages: messages)
+                    try Util.write("chat-\(chatid)", try JSONEncoder().encode(messages));
                 } catch {
                     bestAttemptContent.title = "Error"
                     bestAttemptContent.body = "Could not decrypt"

@@ -15,7 +15,9 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  _buildMessage(Message message, bool isMe) {
+  _buildMessage(Message message) {
+    final bool isMe = message.sender.id == Profile.current.id;
+    if(!isMe) print(message.sender.nameOrDefault());
     final Container msg = Container(
       margin: isMe
           ? EdgeInsets.only(
@@ -46,6 +48,14 @@ class _ChatScreenState extends State<ChatScreen> {
         children: <Widget>[
           Text(
             message.time.toString(),
+            style: TextStyle(
+              color: Colors.blueGrey,
+              fontSize: 16.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            message.sender.nameOrDefault(),
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 16.0,
@@ -184,14 +194,14 @@ class _ChatScreenState extends State<ChatScreen> {
                         AsyncSnapshot<List<Message>> snapshot) {
                       if (snapshot.hasData) {
                         messages = snapshot.data;
+                        messages.sort((a, b) => b.time.compareTo(a.time));
                         return ListView.builder(
                           reverse: true,
                           padding: EdgeInsets.only(top: 15.0),
                           itemCount: messages.length,
                           itemBuilder: (BuildContext context, int index) {
                             final Message message = messages[index];
-                            final bool isMe = message.sender.id == Profile.current.id;
-                            return _buildMessage(message, isMe);
+                            return _buildMessage(message);
                           },
                         );
                       } else {

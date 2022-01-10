@@ -9,15 +9,18 @@ import Foundation
 import Flutter
 
 class Util {
+    static let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.desati.palk")!
     static func read(_ filename: String) throws -> Data {
-        let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.desati.palk")!
         let fileURL = dir.appendingPathComponent(filename)
         return try Data(contentsOf: fileURL)
     }
     static func write(_ filename: String, _ data: Data) throws {
-        let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.desati.palk")
-        let fileURL = dir!.appendingPathComponent(filename)
+        let fileURL = dir.appendingPathComponent(filename)
         try data.write(to: fileURL)
+    }
+    static func delete(_ filename: String) throws {
+        let fileURL = dir.appendingPathComponent(filename)
+        try FileManager.default.removeItem(at: fileURL)
     }
     
     static var channel: FlutterMethodChannel?
@@ -48,6 +51,17 @@ class Util {
                     try write(key, data)
                 } catch {
                     result(FlutterError(code: "WRITERR", message: "could not write to '\(key)'", details: nil))
+                }
+            } else if
+                call.method == "delete",
+                let args = call.arguments as? Dictionary<String, Any>,
+                let key = args["key"] as? String
+            {
+                do {
+                    try delete(key)
+                    result(Bool(true))
+                } catch {
+                    result(FlutterError(code: "DELERR", message: "could not delete from '\(key)'", details: nil))
                 }
             } else {
                 result(FlutterError(code: "BADCALL", message: "no such method or bad args", details: nil))

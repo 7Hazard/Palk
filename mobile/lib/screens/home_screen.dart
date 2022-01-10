@@ -143,8 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: FutureBuilder(
                 future: Chat.all,
-                builder:
-                    (BuildContext context, AsyncSnapshot<Map<String, Chat>> snapshot) {
+                builder: (BuildContext context,
+                    AsyncSnapshot<Map<String, Chat>> snapshot) {
                   if (snapshot.hasData) {
                     var chatsMap = snapshot.data;
                     if (chatsMap.isEmpty) {
@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Center(
-                              child: Text('No messages'),
+                              child: Text('No chats'),
                             )
                           ]);
                     } else {
@@ -178,9 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? chat.lastMessage
                               : Message(
                                   sender: Profile(
-                                    id: "",
-                                    name: 'Mille',
-                                    avatar: 'assets/images/greg.jpg',
+                                    "xxxxxxxxxxxxxxxxxxxx",
                                   ),
                                   text: "No messages yet",
                                   time: DateTime.now(),
@@ -221,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
                                           Text(
-                                            lastmessage.sender.name,
+                                            lastmessage.sender.nameOrDefault(),
                                             style: TextStyle(
                                               color: Colors.grey,
                                               fontSize: 15.0,
