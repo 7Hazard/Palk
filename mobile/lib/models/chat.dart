@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/profile.dart';
 import 'package:flutter_chat_ui/util.dart';
@@ -26,28 +27,6 @@ class Chat {
 
   static MethodChannel channel = () {
     var channel = MethodChannel('solutions.desati.palk/chats');
-    // channel.setMethodCallHandler((call) async {
-    //   switch (call.method) {
-    //     case "message":
-    //       try {
-    //         var chatid = call.arguments["id"];
-    //         var data = jsonDecode(call.arguments["data"]);
-    //         var message = Message(
-    //             sender: await Profile.get(data["from"]),
-    //             text: data["content"],
-    //             time: DateTime.parse(data["time"]),
-    //             unread: true,
-    //             isLiked: false);
-    //         onMessage[chatid](message);
-    //       } catch (e, stacktrace) {
-    //         print("Error: ${e}, ${stacktrace}");
-    //       }
-    //       break;
-    //     default:
-    //       print("Unknown call ${call.method}");
-    //       throw MissingPluginException('No such method');
-    //   }
-    // });
     return channel;
   }();
 
@@ -91,6 +70,7 @@ class Chat {
   }
 
   static Future<Chat> add(String id, String key) async {
+    await FirebaseMessaging.instance.subscribeToTopic(id);
     try {
       int status = await channel.invokeMethod('add', {"id": id, "key": key});
       if (status == 1) {
@@ -107,6 +87,7 @@ class Chat {
   }
 
   static Future<int> remove(String id) async {
+    await FirebaseMessaging.instance.unsubscribeFromTopic(id);
     try {
       int status = await channel.invokeMethod('remove', {"id": id});
       return status;

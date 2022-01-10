@@ -13,7 +13,6 @@ Future write(String key, String data) async {
 MethodChannel channel = () {
   void message(dynamic args) async {
     var chatid = args["chat"];
-    print(chatid);
     var chat = await Chat.get(chatid);
     var message = await chat.decryptMessage(args["data"]);
     chat.messageReceived(message);

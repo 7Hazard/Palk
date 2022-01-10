@@ -174,10 +174,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemCount: chats.length,
                         itemBuilder: (BuildContext context, int index) {
                           var chat = chats[index];
-
-                          FirebaseMessaging.instance
-                              .subscribeToTopic(chat.id); // TEMP
-
                           var lastmessage = chat.lastMessage != null
                               ? chat.lastMessage
                               : Message(

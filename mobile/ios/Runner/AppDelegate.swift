@@ -29,19 +29,6 @@ import NotificationExtension
         // With swizzling disabled you must let Messaging know about the message, for Analytics
         // Messaging.messaging().appDidReceiveMessage(userInfo)
         
-        do {
-            let chatid = userInfo["chat"]! as! String
-            let chats = Chats.read()
-            let chat = chats.chats[chatid]
-            let key = chat!.key
-            
-            let encryptedData = userInfo["data"]! as! String
-            let decryptedData = try decryptData(key, encryptedData)
-            Chats.channel!.invokeMethod("message", arguments: ["id": chatid, "data": decryptedData])
-        } catch {
-            print("Error")
-        }
-        
         var data: [String:Any] = [:]
         userInfo.forEach { data[$0 as! String] = $1 }
         Util.channel?.invokeMethod("notification", arguments: data)

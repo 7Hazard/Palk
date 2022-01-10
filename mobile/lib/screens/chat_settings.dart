@@ -74,7 +74,6 @@ class _ChatSettingsState extends State<ChatSettings> {
                 Chat.remove(widget.chat.id);
                 Navigator.pop(context);
                 Navigator.pop(context);
-                print('leave chat button pressed');
               },
               style: TextButton.styleFrom(
                 primary: Colors.red,
