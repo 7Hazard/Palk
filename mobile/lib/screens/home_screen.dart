@@ -1,8 +1,8 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
-import 'package:flutter_chat_ui/models/message_model.dart';
-import 'package:flutter_chat_ui/models/user_model.dart';
+import 'package:flutter_chat_ui/models/message.dart';
+import 'package:flutter_chat_ui/models/profile.dart';
 import 'package:flutter_chat_ui/screens/new_chat_screen.dart';
 import 'package:flutter_chat_ui/screens/profile_settings_screen.dart';
 import 'package:flutter_chat_ui/screens/scan_code_screen.dart';
@@ -142,21 +142,22 @@ class _HomeScreenState extends State<HomeScreen> {
               topRight: Radius.circular(30.0),
             ),
             child: FutureBuilder(
-                future: Chat.getAll(),
-                builder:
-                    (BuildContext context, AsyncSnapshot<List<Chat>> snapshot) {
+                future: Chat.all,
+                builder: (BuildContext context,
+                    AsyncSnapshot<Map<String, Chat>> snapshot) {
                   if (snapshot.hasData) {
-                    var chats = snapshot.data;
-                    if (chats.isEmpty) {
+                    var chatsMap = snapshot.data;
+                    if (chatsMap.isEmpty) {
                       return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Center(
-                              child: Text('No messages'),
+                              child: Text('No chats'),
                             )
                           ]);
                     } else {
+                      var chats = chatsMap.values.toList();
                       // [a, b, c, null, null]
                       chats.sort((a, b) {
                         if (a.lastUpdate == null && b.lastUpdate == null) {
@@ -166,24 +167,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         } else if (b.lastUpdate == null) {
                           return -1;
                         } else {
-                          return a.lastUpdate.compareTo(b.lastUpdate);
+                          return b.lastUpdate.compareTo(a.lastUpdate);
                         }
                       });
                       return ListView.builder(
                         itemCount: chats.length,
                         itemBuilder: (BuildContext context, int index) {
                           var chat = chats[index];
-
-                          FirebaseMessaging.instance
-                              .subscribeToTopic(chat.id); // TEMP
-
                           var lastmessage = chat.lastMessage != null
                               ? chat.lastMessage
                               : Message(
-                                  sender: User(
-                                    id: 0,
-                                    name: 'Mille',
-                                    imageUrl: 'assets/images/greg.jpg',
+                                  sender: Profile(
+                                    "xxxxxxxxxxxxxxxxxxxx",
                                   ),
                                   text: "No messages yet",
                                   time: DateTime.now(),
@@ -224,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
                                           Text(
-                                            lastmessage.sender.name,
+                                            lastmessage.sender.nameOrDefault(),
                                             style: TextStyle(
                                               color: Colors.grey,
                                               fontSize: 15.0,

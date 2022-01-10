@@ -23,7 +23,7 @@ class NotificationService: UNNotificationServiceExtension {
             if kind == "message" {
                 struct MessageData: Decodable {
                     let from: String
-                    let name: String
+                    let name: String?
                     let content: String
                     let time: String
                 }
@@ -49,8 +49,15 @@ class NotificationService: UNNotificationServiceExtension {
                         MessageData.self,
                         from: decryptedContent.data(using: .utf8)!
                     )
-
-                    bestAttemptContent.title = data.name
+                    
+                    // Get profile, apply differences
+                    let profile = try Profile.read(data.from) ?? Profile(id: data.from)
+                    if let name = data.name {
+                        profile.name = name
+                    }
+                    profile.save()
+                    
+                    bestAttemptContent.title = profile.name ?? String(profile.id.suffix(10))
                     bestAttemptContent.body = data.content
 
                     let message = Message(from: data.from, content: data.content, time: data.time)
@@ -58,9 +65,9 @@ class NotificationService: UNNotificationServiceExtension {
                     chat?.lastUpdate = message.time
                     chats.save()
                     
-                    var messages = Message.all(chatid: chatid)
+                    var messages = try JSONDecoder().decode([Message].self, from: try Util.read("chat-\(chatid)"))
                     messages.append(message)
-                    try Message.saveAll(chatid: chatid, messages: messages)
+                    try Util.write("chat-\(chatid)", try JSONEncoder().encode(messages));
                 } catch {
                     bestAttemptContent.title = "Error"
                     bestAttemptContent.body = "Could not decrypt"

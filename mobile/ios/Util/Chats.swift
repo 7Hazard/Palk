@@ -88,7 +88,7 @@ class Chats: Codable {
                         chats.chats.removeValue(forKey: id)
                         chats.save()
                         
-                        Message.removeByChatId(id)
+                        try? Util.delete("chat-\(id)")
                         
                         result(Int(0))
                     } else {

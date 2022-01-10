@@ -1,69 +1,65 @@
-
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_chat_ui/util.dart';
 
 class Profile {
   final String id;
-  final String name;
+  String name;
+  String avatar;
 
-  Profile({
-    this.id,
-    this.name
-  });
+  Profile(this.id, [this.name, this.avatar]);
+
+  String nameOrDefault({String def}) {
+    if (name == null) {
+      if (def == null) return id.substring(id.length - 10);
+      else return def;
+    }
+    else return name;
+  }
 
   static MethodChannel channel = () {
     var channel = MethodChannel('solutions.desati.palk/profiles');
     return channel;
   }();
 
-  static Future<List<Profile>> getAll() async {
-    try {
-      var json = await channel.invokeMethod('getAll');
-      Map<String, dynamic> obj = jsonDecode(json)["profiles"];
-      return obj.values
-          .map((value) => Profile(
-                id: value["id"],
-                name: value["name"]
-              ))
-          .toList();
-    } on PlatformException catch (e) {
-      print("Could not get chats data:\n\t${e}");
-      return [];
-    } on Error catch (e) {
-      print("Error parsing chats:\n\t${e}");
-      return [];
+  static Map<String, Profile> cache = HashMap();
+  static Future<Profile> get(String id, {Profile defaultProfile: null, bool createIfNotExists: false}) async {
+    if(id == null) {
+      if(defaultProfile == null) throw "ID cannot be null";
+      else return defaultProfile;
     }
+    Profile profile = cache[id];
+    if (profile == null) {
+      try {
+        var json = jsonDecode(await read("profile-${id}"));
+        profile =
+            Profile(json["id"], json["name"], json["avatar"]);
+      } catch (e) {
+        if (createIfNotExists) {
+          profile = Profile(id);
+          await profile.save();
+        } else if (defaultProfile != null) {
+          profile = defaultProfile;
+        }
+        print("No profile by id '${id}'");
+      }
+    }
+    return profile;
+  }
+  
+  static Profile current = null;
+
+  void save() async {
+    await write("profile-${id}", json);
   }
 
-  static Future<Profile> get(String id) async {
-    try {
-      var json = await channel.invokeMethod('get', {"id": id});
-      dynamic obj = jsonDecode(json);
-      return Profile(id: obj["id"], name: obj["name"]);
-    } on Error catch (e) {
-      print("Error parsing profile:\n\t${e}");
-      return null;
-    }
-  }
-
-  static Future<Profile> set(String id, String name) async {
-    try {
-      int status = await channel.invokeMethod('set', {"id": id, "name": name});
-      return Profile(id: id, name: name);
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  static Future<int> remove(String id) async {
-    try {
-      int status = await channel.invokeMethod('remove', {"id": id});
-      return status;
-    } catch (e) {
-      print(e);
-      return null;
-    }
+  String get json {
+    return jsonEncode({
+      "id": id,
+      "name": name,
+      "avatar": avatar,
+    });
   }
 }

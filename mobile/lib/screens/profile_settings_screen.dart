@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_ui/models/profile.dart';
 
 class ProfileSettings extends StatefulWidget {
   @override
@@ -7,7 +7,6 @@ class ProfileSettings extends StatefulWidget {
 }
 
 class _ProfileSettingsState extends State<ProfileSettings> {
-  var _username = 'Palk_User';
   TextEditingController usernameController = new TextEditingController();
 
   @override
@@ -36,12 +35,12 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                   height: 70,
                   width: 200,
                   child: ListTile(
-                      title: Text('Username: ',
+                      title: Text('Name:',
                           style: TextStyle(
                               fontSize: 25,
                               fontWeight: FontWeight.w500,
                               color: Colors.white)),
-                      subtitle: Text("$_username",
+                      subtitle: Text(Profile.current.nameOrDefault(),
                           style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
@@ -64,7 +63,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                 onPressed: () {
                   setState(() {
                     if (!usernameController.text.isEmpty) {
-                      _username = usernameController.text;
+                      Profile.current.name = usernameController.text;
                     }
                   });
                 },

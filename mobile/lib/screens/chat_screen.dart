@@ -1,13 +1,7 @@
-import 'dart:convert';
-
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
-import 'package:flutter_chat_ui/models/message_model.dart';
-import 'package:flutter_chat_ui/models/user_model.dart';
-import 'package:cryptography/cryptography.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_chat_ui/models/message.dart';
+import 'package:flutter_chat_ui/models/profile.dart';
 
 import 'chat_settings.dart';
 
@@ -21,33 +15,9 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  static const platform = MethodChannel('solutions.desati.palk/messages');
-  Future<List<Message>> getMessages() async {
-    try {
-      String json = await platform.invokeMethod('getMessages', widget.chat.id);
-      List<dynamic> jsonlist = jsonDecode(json);
-      var messages = jsonlist
-          .map((msg) => Message(
-                sender: User(
-                  id: 0,
-                  name: 'Mille',
-                  imageUrl: 'assets/images/greg.jpg',
-                ),
-                time: DateTime.parse(msg["time"]),
-                text: msg["content"],
-                unread: true,
-                isLiked: false,
-              ))
-          .toList();
-      messages.sort((a, b) => b.time.compareTo(a.time));
-      return messages;
-    } on PlatformException catch (e) {
-      print("Could not get messages:\n\t${e}");
-      return null;
-    }
-  }
-
-  _buildMessage(Message message, bool isMe) {
+  _buildMessage(Message message) {
+    final bool isMe = message.sender.id == Profile.current.id;
+    if(!isMe) print(message.sender.nameOrDefault());
     final Container msg = Container(
       margin: isMe
           ? EdgeInsets.only(
@@ -78,6 +48,14 @@ class _ChatScreenState extends State<ChatScreen> {
         children: <Widget>[
           Text(
             message.time.toString(),
+            style: TextStyle(
+              color: Colors.blueGrey,
+              fontSize: 16.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            message.sender.nameOrDefault(),
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 16.0,
@@ -136,7 +114,7 @@ class _ChatScreenState extends State<ChatScreen> {
             iconSize: 25.0,
             color: Theme.of(context).primaryColor,
             onPressed: () {
-              sendMessage(textController.text);
+              widget.chat.sendMessage(textController.text);
               textController.clear();
             },
           ),
@@ -145,35 +123,23 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Future<bool> sendMessage(String message) async {
-    final algorithm = AesGcm.with256bits();
-    final secretKey =
-        await algorithm.newSecretKeyFromBytes(utf8.encode(widget.chat.key));
-    final nonce = algorithm.newNonce();
-
-    var data = jsonEncode({
-      "content": message,
-      "from": await FirebaseMessaging.instance.getToken(),
-      "name": "Mille",
-      "time": DateTime.now().toUtc().toIso8601String()
+  List<Message> messages;
+  Future onMessage(Chat chat, Message message) async {
+    setState(() {
+      messages.add(message);
     });
+  }
 
-    // Encrypt
-    final secretBox = await algorithm.encrypt(
-      utf8.encode(data),
-      secretKey: secretKey,
-      nonce: nonce,
-    );
-    var encryptedData = base64Encode(secretBox.concatenation());
-
-    var url = Uri.parse('https://palk.7hazard.workers.dev/messages');
-    var response = await http.post(url,
-        body: jsonEncode({"chat": widget.chat.id, "data": encryptedData}));
-    return response.statusCode == 200;
+  @override
+  void dispose() {
+    widget.chat.unsubscribeOnMessage(onMessage);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    widget.chat.subscribeOnMessage(onMessage);
+
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
@@ -223,20 +189,19 @@ class _ChatScreenState extends State<ChatScreen> {
                     topRight: Radius.circular(30.0),
                   ),
                   child: FutureBuilder(
-                    future: getMessages(),
+                    future: Message.getAll(widget.chat.id),
                     builder: (BuildContext context,
                         AsyncSnapshot<List<Message>> snapshot) {
                       if (snapshot.hasData) {
-                        var messages = snapshot.data;
+                        messages = snapshot.data;
+                        messages.sort((a, b) => b.time.compareTo(a.time));
                         return ListView.builder(
                           reverse: true,
                           padding: EdgeInsets.only(top: 15.0),
                           itemCount: messages.length,
                           itemBuilder: (BuildContext context, int index) {
                             final Message message = messages[index];
-                            final bool isMe =
-                                message.sender.id == currentUser.id;
-                            return _buildMessage(message, isMe);
+                            return _buildMessage(message);
                           },
                         );
                       } else {
