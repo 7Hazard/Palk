@@ -1,8 +1,8 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
-import 'package:flutter_chat_ui/models/message_model.dart';
-import 'package:flutter_chat_ui/models/user_model.dart';
+import 'package:flutter_chat_ui/models/message.dart';
+import 'package:flutter_chat_ui/models/profile.dart';
 import 'package:flutter_chat_ui/screens/new_chat_screen.dart';
 import 'package:flutter_chat_ui/screens/profile_settings_screen.dart';
 import 'package:flutter_chat_ui/screens/scan_code_screen.dart';
@@ -180,10 +180,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           var lastmessage = chat.lastMessage != null
                               ? chat.lastMessage
                               : Message(
-                                  sender: User(
-                                    id: 0,
+                                  sender: Profile(
+                                    id: "",
                                     name: 'Mille',
-                                    imageUrl: 'assets/images/greg.jpg',
+                                    avatar: 'assets/images/greg.jpg',
                                   ),
                                   text: "No messages yet",
                                   time: DateTime.now(),
