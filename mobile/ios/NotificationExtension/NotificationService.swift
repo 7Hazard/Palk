@@ -23,7 +23,7 @@ class NotificationService: UNNotificationServiceExtension {
             if kind == "message" {
                 struct MessageData: Decodable {
                     let from: String
-                    let name: String
+                    let name: String?
                     let content: String
                     let time: String
                 }
@@ -49,8 +49,20 @@ class NotificationService: UNNotificationServiceExtension {
                         MessageData.self,
                         from: decryptedContent.data(using: .utf8)!
                     )
-
-                    bestAttemptContent.title = data.name
+                    
+                    // Get user, apply differences
+                    let profiles = Profiles.read()
+                    var profile = profiles.profiles[data.from]
+                    if profile == nil {
+                        profile = Profile(id: data.from)
+                    }
+                    if let name = data.name {
+                        profile!.name = name
+                    }
+                    profiles.profiles[profile!.id] = profile
+                    profiles.save()
+                    
+                    bestAttemptContent.title = profile!.name ?? "Unnamed"
                     bestAttemptContent.body = data.content
 
                     let message = Message(from: data.from, content: data.content, time: data.time)

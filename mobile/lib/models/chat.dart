@@ -1,9 +1,10 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_chat_ui/models/profile.dart';
 
-import 'message_model.dart';
-import 'user_model.dart';
+import 'message.dart';
 
 class Chat {
   final String id;
@@ -18,13 +19,30 @@ class Chat {
     this.lastUpdate,
   });
 
+  static var onMessage = HashMap<String, void Function(Message message)>();
+
   static MethodChannel channel = () {
     var channel = MethodChannel('solutions.desati.palk/chats');
     channel.setMethodCallHandler((call) async {
-      if (call.method == "notification") {
-        print("notification");
-        // var json = jsonDecode(call.arguments);
-        // print("Notification: ${json}");
+      switch (call.method) {
+        case "message":
+          try {
+            var chatid = call.arguments["id"];
+            var data = jsonDecode(call.arguments["data"]);
+            var message = Message(
+                sender: await Profile.get(data["from"]),
+                text: data["content"],
+                time: DateTime.parse(data["time"]),
+                unread: true,
+                isLiked: false);
+            onMessage[chatid](message);
+          } catch (e, stacktrace) {
+            print("Error: ${e}, ${stacktrace}");
+          }
+          break;
+        default:
+          print("Unknown call ${call.method}");
+          throw MissingPluginException('No such method');
       }
     });
     return channel;
@@ -42,10 +60,10 @@ class Chat {
                     ? Message(
                         text: value["lastMessage"]["content"],
                         time: DateTime.parse(value["lastMessage"]["time"]),
-                        sender: User(
-                          id: 0,
+                        sender: Profile(
+                          id: "",
                           name: 'Mille',
-                          imageUrl: 'assets/images/greg.jpg',
+                          avatar: 'assets/images/greg.jpg',
                         ),
                         isLiked: false,
                         unread: true,

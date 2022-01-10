@@ -6,10 +6,12 @@ import 'package:flutter/services.dart';
 class Profile {
   final String id;
   final String name;
+  final String avatar;
 
   Profile({
     this.id,
-    this.name
+    this.name,
+    this.avatar,
   });
 
   static MethodChannel channel = () {

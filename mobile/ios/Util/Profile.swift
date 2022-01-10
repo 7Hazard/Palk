@@ -11,6 +11,7 @@ import Flutter
 class Profile: Codable {
     var id: String
     var name: String?
+    var avatar: String? // Base64
     
     init(id: String) {
         self.id = id
@@ -63,8 +64,11 @@ class Profiles: Codable {
                 }
             } else if(call.method == "get"), let args = call.arguments as? Dictionary<String, Any>, let id = args["id"] as? String {
                 do {
-                    let profile = Profiles.read().profiles[id];
-                    result(String(data: try JSONEncoder().encode(profile), encoding: .utf8))
+                    if let profile = Profiles.read().profiles[id] {
+                        result(String(data: try JSONEncoder().encode(profile), encoding: .utf8))
+                    } else {
+                        result(nil)
+                    }
                 } catch {
                     result(FlutterError(code: "READERR", message: "Could not read profiles data", details: nil))
                 }

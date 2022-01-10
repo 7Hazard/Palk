@@ -12,8 +12,6 @@
 		29861E832783646F00F853DE /* NotificationExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 29861E7C2783646F00F853DE /* NotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		29861E8E2783E84E00F853DE /* Chats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E8D2783E84E00F853DE /* Chats.swift */; };
 		29861E8F2783E84E00F853DE /* Chats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E8D2783E84E00F853DE /* Chats.swift */; };
-		29861E912783E9FD00F853DE /* Users.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E902783E9FD00F853DE /* Users.swift */; };
-		29861E922783E9FD00F853DE /* Users.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E902783E9FD00F853DE /* Users.swift */; };
 		29861E98278416B000F853DE /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E97278416B000F853DE /* Message.swift */; };
 		29861E99278416B000F853DE /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E97278416B000F853DE /* Message.swift */; };
 		29861E9B2788C34400F853DE /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E9A2788C34400F853DE /* Extensions.swift */; };
@@ -71,7 +69,6 @@
 		29861E7E2783646F00F853DE /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		29861E802783646F00F853DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		29861E8D2783E84E00F853DE /* Chats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chats.swift; sourceTree = "<group>"; };
-		29861E902783E9FD00F853DE /* Users.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Users.swift; sourceTree = "<group>"; };
 		29861E932784078600F853DE /* NotificationExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationExtension.entitlements; sourceTree = "<group>"; };
 		29861E97278416B000F853DE /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		29861E9A2788C34400F853DE /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -133,7 +130,6 @@
 			isa = PBXGroup;
 			children = (
 				29861E8D2783E84E00F853DE /* Chats.swift */,
-				29861E902783E9FD00F853DE /* Users.swift */,
 				29861E97278416B000F853DE /* Message.swift */,
 				29861E9A2788C34400F853DE /* Extensions.swift */,
 				29861E9D278B644A00F853DE /* Profile.swift */,
@@ -382,7 +378,6 @@
 				29861E9F278B644B00F853DE /* Profile.swift in Sources */,
 				29861E7F2783646F00F853DE /* NotificationService.swift in Sources */,
 				29861E99278416B000F853DE /* Message.swift in Sources */,
-				29861E922783E9FD00F853DE /* Users.swift in Sources */,
 				29861E8F2783E84E00F853DE /* Chats.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -391,7 +386,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				29861E912783E9FD00F853DE /* Users.swift in Sources */,
 				29861E9B2788C34400F853DE /* Extensions.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				29861E9E278B644B00F853DE /* Profile.swift in Sources */,
