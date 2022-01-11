@@ -1,9 +1,7 @@
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/profile.dart';
 import 'package:flutter_chat_ui/util.dart';
 import 'package:http/http.dart' as http;
@@ -15,20 +13,24 @@ typedef Future OnMessageFn(Chat chat, Message message);
 class Chat {
   final String id;
   final String key;
-  final Message lastMessage;
-  final DateTime lastUpdate;
+  DateTime lastUpdate;
+  Message lastMessage;
 
-  Chat({
+  Chat(
     this.id,
     this.key,
+    this.lastUpdate, {
     this.lastMessage,
-    this.lastUpdate,
   });
 
-  static MethodChannel channel = () {
-    var channel = MethodChannel('solutions.desati.palk/chats');
-    return channel;
-  }();
+  get object {
+    return {
+      "id": id,
+      "key": key,
+      "lastMessage": lastMessage != null ? lastMessage.object : null,
+      "lastUpdate": lastUpdate.toUtc().toIso8601String()
+    };
+  }
 
   static Map<String, Chat> cache;
   static Future<Map<String, Chat>> get all async {
@@ -36,31 +38,30 @@ class Chat {
     try {
       var json = await read("chats");
       Map<String, dynamic> obj = jsonDecode(json)["chats"];
-      var cache = HashMap<String, Chat>();
-      obj.forEach((key, value) async {
-        cache[key] = Chat(
-          id: value["id"],
-          key: value["key"],
-          lastMessage: value["lastMessage"] != null
-              ? Message(
-                  text: value["lastMessage"]["content"],
-                  time: DateTime.parse(value["lastMessage"]["time"]),
-                  sender: await Profile.get(value["lastMessage"]["from"],
-                      createIfNotExists: true),
-                  isLiked: false,
-                  unread: true,
-                )
-              : null,
-          lastUpdate: value["lastUpdate"] != null
-              ? DateTime.parse(value["lastUpdate"])
-              : null,
-        );
-      });
+
+      // obj.entries.map((kv) async => null);
+      cache = Map.fromEntries(await Future.wait(obj.entries.map((kv) async =>
+          MapEntry(
+              kv.key,
+              Chat(
+                  kv.value["id"],
+                  kv.value["key"],
+                  kv.value["lastUpdate"] != null
+                      ? DateTime.parse(kv.value["lastUpdate"])
+                      : DateTime.now(),
+                  lastMessage:
+                      await Message.fromObject(kv.value["lastMessage"]))))));
       return cache;
-    } on Error catch (e) {
+    } catch (e) {
       print("Error parsing chats:\n\t${e}");
       return {};
     }
+  }
+
+  static void saveAll() async {
+    var chats = (await all).map((key, value) => MapEntry(key, value.object));
+    var json = jsonEncode({"chats": chats});
+    await write("chats", json);
   }
 
   static Future<Chat> get(String chatid) async {
@@ -68,31 +69,19 @@ class Chat {
   }
 
   static Future<Chat> add(String id, String key) async {
+    var chat = cache.putIfAbsent(
+        id, () => Chat(id, key, DateTime.now(), lastMessage: null));
+    write("chat-${id}", "[]");
+    saveAll();
     await FirebaseMessaging.instance.subscribeToTopic(id);
-    try {
-      int status = await channel.invokeMethod('add', {"id": id, "key": key});
-      if (status == 1) {
-        print("Already member of chat");
-        return null;
-      } else {
-        print("Joined chat");
-        return new Chat(id: id, key: key, lastMessage: null);
-      }
-    } catch (e) {
-      print(e);
-      return null;
-    }
+    return chat;
   }
 
-  static Future<int> remove(String id) async {
+  static Future<void> remove(String id) async {
+    cache.remove(id);
+    delete("chat-${id}");
+    saveAll();
     await FirebaseMessaging.instance.unsubscribeFromTopic(id);
-    try {
-      int status = await channel.invokeMethod('remove', {"id": id});
-      return status;
-    } catch (e) {
-      print(e);
-      return null;
-    }
   }
 
   Future<bool> sendMessage(String message) async {
@@ -100,7 +89,6 @@ class Chat {
     final secretKey = await algorithm.newSecretKeyFromBytes(utf8.encode(key));
     final nonce = algorithm.newNonce();
 
-    print("Profile.current.name: ${Profile.current.name}");
     var data = jsonEncode({
       "content": message,
       "from": Profile.current.id,
@@ -139,10 +127,23 @@ class Chat {
     var json = jsonDecode(await decrypt(data));
     return Message(
         sender: await Profile.get(json["from"]),
-        text: json["content"],
+        content: json["content"],
         time: DateTime.parse(json["time"]),
         unread: true,
         isLiked: false);
+  }
+
+  Future<List<Message>> get messages async {
+    try {
+      var json = await read("chat-${id}");
+      List<dynamic> jsonlist = jsonDecode(json);
+      var messages = await Future.wait(
+          jsonlist.map((msg) async => await Message.fromObject(msg)));
+      return messages;
+    } catch (e) {
+      print("Could not get messages:\n\t${e}");
+      return [];
+    }
   }
 
   static var onMessageHandlers = Set<OnMessageFn>();
@@ -156,6 +157,9 @@ class Chat {
   }
 
   void messageReceived(Message message) {
+    lastMessage = message;
+    lastUpdate = message.time;
+    saveAll();
     onMessageHandlers.forEach((fn) {
       fn(this, message);
     });

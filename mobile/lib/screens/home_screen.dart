@@ -90,9 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (_) => NewChatScreen(),
                   ),
                 ).then((value) {
-                  setState(() {
-                    print('updated homescreen');
-                  });
+                  setState(() {});
                 });
               },
               shape: RoundedRectangleBorder(
@@ -180,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   sender: Profile(
                                     "xxxxxxxxxxxxxxxxxxxx",
                                   ),
-                                  text: "No messages yet",
+                                  content: "No messages yet",
                                   time: DateTime.now(),
                                   isLiked: false,
                                   unread: false);
@@ -233,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     .width *
                                                 0.45,
                                             child: Text(
-                                              lastmessage.text,
+                                              lastmessage.content,
                                               style: TextStyle(
                                                 color: Colors.blueGrey,
                                                 fontSize: 15.0,
@@ -251,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Text(
                                         DateFormat("yyyy-MM-dd").format(
                                             DateTime.parse(
-                                                lastmessage.time.toString())),
+                                                chat.lastUpdate.toString())),
                                         style: TextStyle(
                                           color: Colors.grey,
                                           fontSize: 15.0,

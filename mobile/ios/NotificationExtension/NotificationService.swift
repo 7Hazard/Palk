@@ -31,15 +31,15 @@ class NotificationService: UNNotificationServiceExtension {
                 do {
                     let chatid = bestAttemptContent.userInfo["chat"]! as! String
                     let chats = Chats.read()
-                    var chat = chats.chats[chatid]
+                    let chat = chats.chats[chatid]
 
                     let key = chat!.key
                     
                     // tmp in future chats will be guaranteed to exist
-                    if chat == nil {
-                        chat = Chat(id: chatid, key: key)
-                        chats.chats[chatid] = chat
-                    }
+//                    if chat == nil {
+//                        chat = Chat(id: chatid, key: key)
+//                        chats.chats[chatid] = chat
+//                    }
                     // tmp
                     
                     let encryptedData = bestAttemptContent.userInfo["data"]! as! String

@@ -9,6 +9,10 @@ Future write(String key, String data) async {
   await channel.invokeMethod("write", {"key": key, "data": data});
 }
 
+Future delete(String key) async {
+  await channel.invokeMethod("delete", {"key": key});
+}
+
 MethodChannel channel = () {
   void message(dynamic args) async {
     var chatid = args["chat"];
@@ -27,8 +31,6 @@ MethodChannel channel = () {
         return print("Unknown notification kind '${kind}'");
     }
   }
-
-  ;
 
   var channel = MethodChannel('solutions.desati.palk');
   channel.setMethodCallHandler((call) async {

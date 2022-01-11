@@ -7,6 +7,15 @@ import 'chat_settings.dart';
 
 class ChatScreen extends StatefulWidget {
   final Chat chat;
+  List<Message> _messages;
+
+  Future<List<Message>> get messages async {
+    if (_messages != null) return _messages;
+    _messages = await chat.messages;
+    _messages.sort((a, b) => b.time.compareTo(a.time));
+    print("chatscreen messages ${_messages}");
+    return _messages;
+  }
 
   ChatScreen({this.chat});
 
@@ -17,7 +26,6 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   _buildMessage(Message message) {
     final bool isMe = message.sender.id == Profile.current.id;
-    if(!isMe) print(message.sender.nameOrDefault());
     final Container msg = Container(
       margin: isMe
           ? EdgeInsets.only(
@@ -64,7 +72,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           SizedBox(height: 8.0),
           Text(
-            message.text,
+            message.content,
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 16.0,
@@ -123,11 +131,19 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  List<Message> messages;
   Future onMessage(Chat chat, Message message) async {
-    setState(() {
-      messages.add(message);
-    });
+    print("ON MESSAGE");
+    if (widget._messages != null) {
+      setState(() {
+        widget._messages.insert(0, message);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    widget.chat.subscribeOnMessage(onMessage);
+    super.initState();
   }
 
   @override
@@ -138,8 +154,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    widget.chat.subscribeOnMessage(onMessage);
-
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
@@ -189,12 +203,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     topRight: Radius.circular(30.0),
                   ),
                   child: FutureBuilder(
-                    future: Message.getAll(widget.chat.id),
+                    future: widget.messages,
                     builder: (BuildContext context,
                         AsyncSnapshot<List<Message>> snapshot) {
                       if (snapshot.hasData) {
-                        messages = snapshot.data;
-                        messages.sort((a, b) => b.time.compareTo(a.time));
+                        var messages = snapshot.data;
                         return ListView.builder(
                           reverse: true,
                           padding: EdgeInsets.only(top: 15.0),

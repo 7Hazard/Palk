@@ -13,10 +13,12 @@ class Profile {
 
   String nameOrDefault({String def}) {
     if (name == null) {
-      if (def == null) return id.substring(id.length - 10);
-      else return def;
-    }
-    else return name;
+      if (def == null)
+        return id.substring(id.length - 10);
+      else
+        return def;
+    } else
+      return name;
   }
 
   static MethodChannel channel = () {
@@ -25,17 +27,19 @@ class Profile {
   }();
 
   static Map<String, Profile> cache = HashMap();
-  static Future<Profile> get(String id, {Profile defaultProfile: null, bool createIfNotExists: false}) async {
-    if(id == null) {
-      if(defaultProfile == null) throw "ID cannot be null";
-      else return defaultProfile;
+  static Future<Profile> get(String id,
+      {Profile defaultProfile: null, bool createIfNotExists: false}) async {
+    if (id == null) {
+      if (defaultProfile == null)
+        throw "ID cannot be null";
+      else
+        return defaultProfile;
     }
     Profile profile = cache[id];
     if (profile == null) {
       try {
         var json = jsonDecode(await read("profile-${id}"));
-        profile =
-            Profile(json["id"], json["name"], json["avatar"]);
+        profile = Profile(json["id"], json["name"], json["avatar"]);
       } catch (e) {
         if (createIfNotExists) {
           profile = Profile(id);
@@ -48,18 +52,22 @@ class Profile {
     }
     return profile;
   }
-  
+
   static Profile current = null;
 
   void save() async {
     await write("profile-${id}", json);
   }
 
-  String get json {
-    return jsonEncode({
+  dynamic get object {
+    return {
       "id": id,
       "name": name,
       "avatar": avatar,
-    });
+    };
+  }
+
+  String get json {
+    return jsonEncode(object);
   }
 }
