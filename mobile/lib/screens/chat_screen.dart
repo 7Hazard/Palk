@@ -132,7 +132,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future onMessage(Chat chat, Message message) async {
-    print("ON MESSAGE");
     if (widget._messages != null) {
       setState(() {
         widget._messages.insert(0, message);
@@ -142,13 +141,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
-    widget.chat.subscribeOnMessage(onMessage);
     super.initState();
+    Chat.subscribeOnMessage(onMessage);
   }
 
   @override
   void dispose() {
-    widget.chat.unsubscribeOnMessage(onMessage);
+    Chat.unsubscribeOnMessage(onMessage);
     super.dispose();
   }
 

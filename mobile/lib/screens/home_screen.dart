@@ -1,4 +1,3 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/message.dart';
@@ -16,6 +15,22 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Future onMessage(Chat chat, Message message) async {
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Chat.subscribeOnMessage(onMessage);
+  }
+
+  @override
+  void dispose() {
+    Chat.unsubscribeOnMessage(onMessage);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

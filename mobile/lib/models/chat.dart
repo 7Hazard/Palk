@@ -148,11 +148,11 @@ class Chat {
 
   static var onMessageHandlers = Set<OnMessageFn>();
 
-  void subscribeOnMessage(OnMessageFn fn) {
+  static void subscribeOnMessage(OnMessageFn fn) {
     onMessageHandlers.add(fn);
   }
 
-  void unsubscribeOnMessage(OnMessageFn fn) {
+  static void unsubscribeOnMessage(OnMessageFn fn) {
     onMessageHandlers.remove(fn);
   }
 
