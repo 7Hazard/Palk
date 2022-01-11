@@ -1,4 +1,3 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/message.dart';
@@ -16,6 +15,22 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Future onMessage(Chat chat, Message message) async {
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Chat.subscribeOnMessage(onMessage);
+  }
+
+  @override
+  void dispose() {
+    Chat.unsubscribeOnMessage(onMessage);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,9 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (_) => NewChatScreen(),
                   ),
                 ).then((value) {
-                  setState(() {
-                    print('updated homescreen');
-                  });
+                  setState(() {});
                 });
               },
               shape: RoundedRectangleBorder(
@@ -180,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   sender: Profile(
                                     "xxxxxxxxxxxxxxxxxxxx",
                                   ),
-                                  text: "No messages yet",
+                                  content: "No messages yet",
                                   time: DateTime.now(),
                                   isLiked: false,
                                   unread: false);
@@ -233,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     .width *
                                                 0.45,
                                             child: Text(
-                                              lastmessage.text,
+                                              lastmessage.content,
                                               style: TextStyle(
                                                 color: Colors.blueGrey,
                                                 fontSize: 15.0,
@@ -251,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Text(
                                         DateFormat("yyyy-MM-dd").format(
                                             DateTime.parse(
-                                                lastmessage.time.toString())),
+                                                chat.lastUpdate.toString())),
                                         style: TextStyle(
                                           color: Colors.grey,
                                           fontSize: 15.0,
