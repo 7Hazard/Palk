@@ -15,7 +15,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
   Widget build(BuildContext context) {
     var id = Uuid().v1();
     var key = id.replaceAll("-", "");
-    Chat.add(id, key);
+    var name = "New chat";
+    Chat.add(id, key, name);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -36,7 +37,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
         children: [
           Center(
             child: QrImage(
-              data: "palk://chat?id=${id}&key=${key}",
+              data: "palk://chat?id=${id}&key=${key}&name=${name}",
               version: QrVersions.auto,
               size: 200.0, // Determines QR-code size
             ),

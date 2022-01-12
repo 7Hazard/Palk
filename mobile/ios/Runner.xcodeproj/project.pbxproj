@@ -14,8 +14,8 @@
 		29861E832783646F00F853DE /* NotificationExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 29861E7C2783646F00F853DE /* NotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		29861E8E2783E84E00F853DE /* Chats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E8D2783E84E00F853DE /* Chats.swift */; };
 		29861E8F2783E84E00F853DE /* Chats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E8D2783E84E00F853DE /* Chats.swift */; };
-		29861E98278416B000F853DE /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E97278416B000F853DE /* Message.swift */; };
-		29861E99278416B000F853DE /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E97278416B000F853DE /* Message.swift */; };
+		29861E98278416B000F853DE /* ChatEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E97278416B000F853DE /* ChatEntry.swift */; };
+		29861E99278416B000F853DE /* ChatEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E97278416B000F853DE /* ChatEntry.swift */; };
 		29861E9B2788C34400F853DE /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E9A2788C34400F853DE /* Extensions.swift */; };
 		29861E9C2788C34400F853DE /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E9A2788C34400F853DE /* Extensions.swift */; };
 		29861E9E278B644B00F853DE /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29861E9D278B644A00F853DE /* Profile.swift */; };
@@ -73,7 +73,7 @@
 		29861E802783646F00F853DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		29861E8D2783E84E00F853DE /* Chats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chats.swift; sourceTree = "<group>"; };
 		29861E932784078600F853DE /* NotificationExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationExtension.entitlements; sourceTree = "<group>"; };
-		29861E97278416B000F853DE /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		29861E97278416B000F853DE /* ChatEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatEntry.swift; sourceTree = "<group>"; };
 		29861E9A2788C34400F853DE /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		29861E9D278B644A00F853DE /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
@@ -133,7 +133,7 @@
 			isa = PBXGroup;
 			children = (
 				29861E8D2783E84E00F853DE /* Chats.swift */,
-				29861E97278416B000F853DE /* Message.swift */,
+				29861E97278416B000F853DE /* ChatEntry.swift */,
 				29861E9A2788C34400F853DE /* Extensions.swift */,
 				29861E9D278B644A00F853DE /* Profile.swift */,
 				293EFF2C278BCC3C005D7124 /* Util.swift */,
@@ -382,7 +382,7 @@
 				293EFF2E278BCC3C005D7124 /* Util.swift in Sources */,
 				29861E9F278B644B00F853DE /* Profile.swift in Sources */,
 				29861E7F2783646F00F853DE /* NotificationService.swift in Sources */,
-				29861E99278416B000F853DE /* Message.swift in Sources */,
+				29861E99278416B000F853DE /* ChatEntry.swift in Sources */,
 				29861E8F2783E84E00F853DE /* Chats.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -395,7 +395,7 @@
 				29861E9B2788C34400F853DE /* Extensions.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				29861E9E278B644B00F853DE /* Profile.swift in Sources */,
-				29861E98278416B000F853DE /* Message.swift in Sources */,
+				29861E98278416B000F853DE /* ChatEntry.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				29861E8E2783E84E00F853DE /* Chats.swift in Sources */,
 			);

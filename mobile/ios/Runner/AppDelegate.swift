@@ -9,7 +9,6 @@ import NotificationExtension
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         let messanger = (window?.rootViewController as! FlutterViewController).binaryMessenger
-        Chats.registerChannel(messanger)
         Util.registerChannel(messanger)
         
         GeneratedPluginRegistrant.register(with: self)

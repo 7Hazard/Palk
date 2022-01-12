@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
@@ -6,38 +7,41 @@ import 'package:flutter_chat_ui/models/profile.dart';
 import 'package:flutter_chat_ui/util.dart';
 import 'package:http/http.dart' as http;
 
-import 'message.dart';
+import 'chat_entry.dart';
 
-typedef Future OnMessageFn(Chat chat, Message message);
+typedef Future OnMessageFn(Chat chat, ChatEntry message);
 
 class Chat {
   final String id;
   final String key;
+  String name;
   DateTime lastUpdate;
-  Message lastMessage;
+  ChatEntry? lastEntry;
 
   Chat(
     this.id,
     this.key,
+    this.name,
     this.lastUpdate, {
-    this.lastMessage,
+    this.lastEntry,
   });
 
   get object {
     return {
       "id": id,
       "key": key,
-      "lastMessage": lastMessage != null ? lastMessage.object : null,
-      "lastUpdate": lastUpdate.toUtc().toIso8601String()
+      "name": name,
+      "lastUpdate": lastUpdate.toUtc().toIso8601String(),
+      "lastEntry": lastEntry?.object,
     };
   }
 
-  static Map<String, Chat> cache;
+  static Map<String, Chat>? cache;
   static Future<Map<String, Chat>> get all async {
-    if (cache != null) return cache;
+    if (cache != null) return cache!;
     try {
       var json = await read("chats");
-      Map<String, dynamic> obj = jsonDecode(json)["chats"];
+      Map<String, dynamic> obj = jsonDecode(json);
 
       // obj.entries.map((kv) async => null);
       cache = Map.fromEntries(await Future.wait(obj.entries.map((kv) async =>
@@ -46,31 +50,32 @@ class Chat {
               Chat(
                   kv.value["id"],
                   kv.value["key"],
+                  kv.value["name"],
                   kv.value["lastUpdate"] != null
                       ? DateTime.parse(kv.value["lastUpdate"])
                       : DateTime.now(),
-                  lastMessage:
-                      await Message.fromObject(kv.value["lastMessage"]))))));
-      return cache;
+                  lastEntry:
+                      await ChatEntry.fromObject(kv.value["lastEntry"]))))));
     } catch (e) {
       print("Error parsing chats:\n\t${e}");
-      return {};
+      cache = {};
     }
+    return cache!;
   }
 
   static void saveAll() async {
     var chats = (await all).map((key, value) => MapEntry(key, value.object));
-    var json = jsonEncode({"chats": chats});
+    var json = jsonEncode(chats);
     await write("chats", json);
   }
 
-  static Future<Chat> get(String chatid) async {
+  static Future<Chat?> get(String chatid) async {
     return (await all)[chatid];
   }
 
-  static Future<Chat> add(String id, String key) async {
-    var chat = cache.putIfAbsent(
-        id, () => Chat(id, key, DateTime.now(), lastMessage: null));
+  static Future<Chat> add(String id, String key, String name) async {
+    var chat = cache!.putIfAbsent(
+        id, () => Chat(id, key, name, DateTime.now(), lastEntry: null));
     write("chat-${id}", "[]");
     saveAll();
     await FirebaseMessaging.instance.subscribeToTopic(id);
@@ -78,7 +83,7 @@ class Chat {
   }
 
   static Future<void> remove(String id) async {
-    cache.remove(id);
+    cache?.remove(id);
     delete("chat-${id}");
     saveAll();
     await FirebaseMessaging.instance.unsubscribeFromTopic(id);
@@ -86,14 +91,13 @@ class Chat {
 
   Future<bool> sendMessage(String message) async {
     final algorithm = AesGcm.with256bits(nonceLength: 12);
-    final secretKey = await algorithm.newSecretKeyFromBytes(utf8.encode(key));
+    final secretKey = await algorithm.newSecretKeyFromBytes(utf8.encode(key!));
     final nonce = algorithm.newNonce();
 
     var data = jsonEncode({
+      "time": DateTime.now().toUtc().toIso8601String(),
+      "from": Profile.current!.id,
       "content": message,
-      "from": Profile.current.id,
-      "name": Profile.current.name,
-      "time": DateTime.now().toUtc().toIso8601String()
     });
 
     // Encrypt
@@ -113,7 +117,7 @@ class Chat {
   /// Decrypts data using chat's key
   Future<String> decrypt(String data) async {
     final algorithm = AesGcm.with256bits(nonceLength: 12);
-    final secretKey = await algorithm.newSecretKeyFromBytes(utf8.encode(key));
+    final secretKey = await algorithm.newSecretKeyFromBytes(utf8.encode(key!));
     var secretbox = SecretBox.fromConcatenation(base64Decode(data).toList(),
         nonceLength: algorithm.nonceLength,
         macLength: algorithm.macAlgorithm.macLength);
@@ -123,22 +127,12 @@ class Chat {
     return decrypted;
   }
 
-  Future<Message> decryptMessage(String data) async {
-    var json = jsonDecode(await decrypt(data));
-    return Message(
-        sender: await Profile.get(json["from"]),
-        content: json["content"],
-        time: DateTime.parse(json["time"]),
-        unread: true,
-        isLiked: false);
-  }
-
-  Future<List<Message>> get messages async {
+  Future<List<ChatEntry>> get entries async {
     try {
       var json = await read("chat-${id}");
       List<dynamic> jsonlist = jsonDecode(json);
       var messages = await Future.wait(
-          jsonlist.map((msg) async => await Message.fromObject(msg)));
+          jsonlist.map((msg) async => (await ChatEntry.fromObject(msg))!));
       return messages;
     } catch (e) {
       print("Could not get messages:\n\t${e}");
@@ -146,21 +140,20 @@ class Chat {
     }
   }
 
-  static var onMessageHandlers = Set<OnMessageFn>();
+  static var onActivityHandlers = Set<OnMessageFn>();
 
-  static void subscribeOnMessage(OnMessageFn fn) {
-    onMessageHandlers.add(fn);
+  static void subscribeOnActivity(OnMessageFn fn) {
+    onActivityHandlers.add(fn);
   }
 
-  static void unsubscribeOnMessage(OnMessageFn fn) {
-    onMessageHandlers.remove(fn);
+  static void unsubscribeOnActivity(OnMessageFn fn) {
+    onActivityHandlers.remove(fn);
   }
 
-  void messageReceived(Message message) {
-    lastMessage = message;
+  void messageReceived(ChatEntry message) {
+    lastEntry = message;
     lastUpdate = message.time;
-    saveAll();
-    onMessageHandlers.forEach((fn) {
+    onActivityHandlers.forEach((fn) {
       fn(this, message);
     });
   }

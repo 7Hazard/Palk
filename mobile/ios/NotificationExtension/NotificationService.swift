@@ -6,6 +6,7 @@
 //
 
 import UserNotifications
+import CryptoKit
 
 class NotificationService: UNNotificationServiceExtension {
     
@@ -17,60 +18,62 @@ class NotificationService: UNNotificationServiceExtension {
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
         if let bestAttemptContent = bestAttemptContent {
-            
+            bestAttemptContent.body = "kind"
             let kind = bestAttemptContent.userInfo["kind"]! as! String
-            
             if kind == "message" {
-                struct MessageData: Decodable {
-                    let from: String
-                    let name: String?
-                    let content: String
-                    let time: String
-                }
-                
                 do {
+                    bestAttemptContent.body = "chatid" // these are for debugging
                     let chatid = bestAttemptContent.userInfo["chat"]! as! String
-                    let chats = Chats.read()
-                    let chat = chats.chats[chatid]
+                    bestAttemptContent.body = "read chats"
+                    let chats = try JSONDecoder().decode([String:Chat].self, from: Util.read("chats"))
+                    if let chat = chats[chatid] {
+                        let key = chat.key
+                        
+                        bestAttemptContent.body = "data"
+                        let encryptedData = bestAttemptContent.userInfo["data"]! as! String
+                        bestAttemptContent.body = "decrypt"
+                        let decryptedContent = try decryptData(key, encryptedData)
 
-                    let key = chat!.key
-                    
-                    // tmp in future chats will be guaranteed to exist
-//                    if chat == nil {
-//                        chat = Chat(id: chatid, key: key)
-//                        chats.chats[chatid] = chat
-//                    }
-                    // tmp
-                    
-                    let encryptedData = bestAttemptContent.userInfo["data"]! as! String
-                    let decryptedContent = try decryptData(key, encryptedData)
+                        struct MessageData: Decodable {
+                            let time: String
+                            let from: String
+                            let content: String
+                        }
+                        bestAttemptContent.body = "json"
+                        let data = try JSONDecoder().decode(
+                            MessageData.self,
+                            from: decryptedContent.data(using: .utf8)!
+                        )
 
-                    let data = try JSONDecoder().decode(
-                        MessageData.self,
-                        from: decryptedContent.data(using: .utf8)!
-                    )
-                    
-                    // Get profile, apply differences
-                    let profile = try Profile.read(data.from) ?? Profile(id: data.from)
-                    if let name = data.name {
-                        profile.name = name
+                        let entry = ChatEntry(
+                            time: data.time,
+                            kind: "message",
+                            message: Message(
+                                from: data.from,
+                                content: data.content,
+                                unread: true
+                            )
+                        )
+                        chat.lastEntry = entry
+                        chat.lastUpdate = entry.time
+                        bestAttemptContent.body = "chats write"
+                        try Util.write("chats", try JSONEncoder().encode(chats))
+                        
+                        bestAttemptContent.body = "messages read"
+                        var messages = try JSONDecoder().decode([ChatEntry].self, from: try Util.read("chat-\(chatid)"))
+                        messages.append(entry)
+                        bestAttemptContent.body = "messages write"
+                        try Util.write("chat-\(chatid)", try JSONEncoder().encode(messages));
+                        
+                        // finally
+                        bestAttemptContent.title = chat.name
+                        bestAttemptContent.body = data.content
+                    } else {
+                        bestAttemptContent.title = "Unknown chat"
+                        bestAttemptContent.body = "Encrypted message"
                     }
-                    profile.save()
-                    
-                    bestAttemptContent.title = profile.name ?? String(profile.id.suffix(10))
-                    bestAttemptContent.body = data.content
-
-                    let message = Message(from: data.from, content: data.content, time: data.time)
-                    chat?.lastMessage = message
-                    chat?.lastUpdate = message.time
-                    chats.save()
-                    
-                    var messages = try JSONDecoder().decode([Message].self, from: try Util.read("chat-\(chatid)"))
-                    messages.append(message)
-                    try Util.write("chat-\(chatid)", try JSONEncoder().encode(messages));
                 } catch {
                     bestAttemptContent.title = "Error"
-                    bestAttemptContent.body = "Could not decrypt"
                 }
             }
             
@@ -86,4 +89,18 @@ class NotificationService: UNNotificationServiceExtension {
         }
     }
     
+}
+
+func decryptData(_ key: String, _ message: String) throws -> String {
+    let key = SymmetricKey(data: key.data(using: .utf8)!)
+    let data = Data(base64Encoded: message)!
+
+    let nonce = data[0...11] // = initialization vector
+    let tag = data[data.count-16...data.count-1]
+    let ciphertext = data[12...data.count-17]
+
+    let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonce), ciphertext: ciphertext, tag: tag)
+
+    let decryptedData = try AES.GCM.open(sealedBox, using: key)
+    return String(decoding: decryptedData, as: UTF8.self)
 }

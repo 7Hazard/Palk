@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
-import 'package:flutter_chat_ui/models/message.dart';
+import 'package:flutter_chat_ui/models/chat_entry.dart';
 import 'package:flutter_chat_ui/models/profile.dart';
 
 import 'chat_settings.dart';
 
 class ChatScreen extends StatefulWidget {
   final Chat chat;
-  List<Message> _messages;
 
-  Future<List<Message>> get messages async {
-    if (_messages != null) return _messages;
-    _messages = await chat.messages;
-    _messages.sort((a, b) => b.time.compareTo(a.time));
-    print("chatscreen messages ${_messages}");
-    return _messages;
-  }
-
-  ChatScreen({this.chat});
+  ChatScreen(this.chat);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  _buildMessage(Message message) {
-    final bool isMe = message.sender.id == Profile.current.id;
+  List<ChatEntry?>? _messages;
+
+  Future<List<ChatEntry?>?> get messages async {
+    if (_messages != null) return _messages;
+    _messages = await widget.chat!.entries;
+    _messages!.sort((a, b) => b!.time.compareTo(a!.time));
+    print("loaded messages");
+    return _messages;
+  }
+
+  _buildMessage(ChatEntry entry) {
+    final bool isMe = entry.message!.from.id == Profile.current!.id;
     final Container msg = Container(
       margin: isMe
           ? EdgeInsets.only(
@@ -55,7 +56,7 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            message.time.toString(),
+            entry.time.toString(),
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 16.0,
@@ -63,7 +64,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Text(
-            message.sender.nameOrDefault(),
+            entry.message!.from.nameOrDefault(),
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 16.0,
@@ -72,7 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           SizedBox(height: 8.0),
           Text(
-            message.content,
+            entry.message!.content,
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 16.0,
@@ -122,7 +123,7 @@ class _ChatScreenState extends State<ChatScreen> {
             iconSize: 25.0,
             color: Theme.of(context).primaryColor,
             onPressed: () {
-              widget.chat.sendMessage(textController.text);
+              widget.chat!.sendMessage(textController.text);
               textController.clear();
             },
           ),
@@ -131,10 +132,10 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Future onMessage(Chat chat, Message message) async {
-    if (widget._messages != null) {
+  Future onMessage(Chat chat, ChatEntry message) async {
+    if (_messages != null) {
       setState(() {
-        widget._messages.insert(0, message);
+        _messages!.insert(0, message);
       });
     }
   }
@@ -142,12 +143,12 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    Chat.subscribeOnMessage(onMessage);
+    Chat.subscribeOnActivity(onMessage);
   }
 
   @override
   void dispose() {
-    Chat.unsubscribeOnMessage(onMessage);
+    Chat.unsubscribeOnActivity(onMessage);
     super.dispose();
   }
 
@@ -202,18 +203,18 @@ class _ChatScreenState extends State<ChatScreen> {
                     topRight: Radius.circular(30.0),
                   ),
                   child: FutureBuilder(
-                    future: widget.messages,
+                    future: messages,
                     builder: (BuildContext context,
-                        AsyncSnapshot<List<Message>> snapshot) {
+                        AsyncSnapshot<List<ChatEntry?>?> snapshot) {
                       if (snapshot.hasData) {
-                        var messages = snapshot.data;
+                        var messages = snapshot.data!;
                         return ListView.builder(
                           reverse: true,
                           padding: EdgeInsets.only(top: 15.0),
                           itemCount: messages.length,
                           itemBuilder: (BuildContext context, int index) {
-                            final Message message = messages[index];
-                            return _buildMessage(message);
+                            final ChatEntry entry = messages[index]!;
+                            return _buildMessage(entry);
                           },
                         );
                       } else {

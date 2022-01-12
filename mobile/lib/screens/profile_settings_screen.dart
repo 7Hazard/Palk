@@ -40,7 +40,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                               fontSize: 25,
                               fontWeight: FontWeight.w500,
                               color: Colors.white)),
-                      subtitle: Text(Profile.current.nameOrDefault(),
+                      subtitle: Text(Profile.current!.nameOrDefault()!,
                           style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
@@ -63,7 +63,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                 onPressed: () {
                   setState(() {
                     if (!usernameController.text.isEmpty) {
-                      Profile.current.name = usernameController.text;
+                      Profile.current!.name = usernameController.text;
                     }
                   });
                 },

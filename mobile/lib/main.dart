@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-void initFirebase() async {
+Future<void> initFirebase() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -57,8 +57,8 @@ void initFirebase() async {
       sound: true,
     );
 
-    String token = await messaging.getToken();
+    String token = (await messaging.getToken())!;
     print('FCM token: ${token}');
-    Profile.current = await Profile.get(token, createIfNotExists: true);
+    Profile.current = await Profile.get(token);
   }
 }

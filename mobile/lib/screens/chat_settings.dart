@@ -3,7 +3,7 @@ import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class ChatSettings extends StatefulWidget {
-  final Chat chat;
+  final Chat? chat;
 
   ChatSettings({this.chat});
 
@@ -32,7 +32,7 @@ class _ChatSettingsState extends State<ChatSettings> {
                   backgroundColor: Colors.white,
                   child: QrImage(
                     data:
-                        "palk://chat?id=${widget.chat.id}&key=${widget.chat.key}",
+                        "palk://chat?id=${widget.chat!.id}&key=${widget.chat!.key}",
                     version: QrVersions.auto,
                     size: 100.0, // Determines QR-code size
                   ),
@@ -71,7 +71,7 @@ class _ChatSettingsState extends State<ChatSettings> {
             ),
             TextButton(
               onPressed: () {
-                Chat.remove(widget.chat.id);
+                Chat.remove(widget.chat!.id!);
                 Navigator.pop(context);
                 Navigator.pop(context);
               },
@@ -91,10 +91,10 @@ class _ChatSettingsState extends State<ChatSettings> {
 }
 
 class SettingsListItem extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
   final text;
 
-  const SettingsListItem({Key key, this.icon, this.text}) : super(key: key);
+  const SettingsListItem({Key? key, this.icon, this.text}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

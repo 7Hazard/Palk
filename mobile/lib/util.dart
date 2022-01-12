@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
+
+import 'models/chat_entry.dart';
+import 'models/profile.dart';
 
 Future<String> read(String key) async {
   return await channel.invokeMethod("read", {"key": key});
 }
 
-Future write(String key, String data) async {
+Future<void> write(String key, String data) async {
   await channel.invokeMethod("write", {"key": key, "data": data});
 }
 
@@ -17,9 +22,19 @@ MethodChannel channel = () {
   void message(dynamic args) async {
     var chatid = args["chat"];
     var chat = await Chat.get(chatid);
-    var message = await chat.decryptMessage(args["data"]);
-    chat.messageReceived(message);
+    var data = args["data"];
+    var decrypted = await chat!.decrypt(data);
+    var json = jsonDecode(decrypted);
+    var entry = ChatEntry(DateTime.parse(json["time"]), "message", message: Message(
+        await Profile.get(json["from"]),
+        json["content"],
+        true,
+    ));
+    chat.messageReceived(entry);
   }
+
+decrypt(data) {
+}
 
   void notification(dynamic args) async {
     var kind = args["kind"];

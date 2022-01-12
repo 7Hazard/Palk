@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
-import 'package:flutter_chat_ui/models/message.dart';
+import 'package:flutter_chat_ui/models/chat_entry.dart';
 import 'package:flutter_chat_ui/models/profile.dart';
 import 'package:flutter_chat_ui/screens/new_chat_screen.dart';
 import 'package:flutter_chat_ui/screens/profile_settings_screen.dart';
@@ -15,19 +15,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Future onMessage(Chat chat, Message message) async {
+  Future onChatActivity(Chat chat, ChatEntry entry) async {
     setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    Chat.subscribeOnMessage(onMessage);
+    Chat.subscribeOnActivity(onChatActivity);
   }
 
   @override
   void dispose() {
-    Chat.unsubscribeOnMessage(onMessage);
+    Chat.unsubscribeOnActivity(onChatActivity);
     super.dispose();
   }
 
@@ -157,9 +157,9 @@ class _HomeScreenState extends State<HomeScreen> {
             child: FutureBuilder(
                 future: Chat.all,
                 builder: (BuildContext context,
-                    AsyncSnapshot<Map<String, Chat>> snapshot) {
+                    AsyncSnapshot<Map<String, Chat>?> snapshot) {
                   if (snapshot.hasData) {
-                    var chatsMap = snapshot.data;
+                    var chatsMap = snapshot.data!;
                     if (chatsMap.isEmpty) {
                       return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -187,21 +187,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemCount: chats.length,
                         itemBuilder: (BuildContext context, int index) {
                           var chat = chats[index];
-                          var lastmessage = chat.lastMessage != null
-                              ? chat.lastMessage
-                              : Message(
-                                  sender: Profile(
-                                    "xxxxxxxxxxxxxxxxxxxx",
-                                  ),
-                                  content: "No messages yet",
-                                  time: DateTime.now(),
-                                  isLiked: false,
-                                  unread: false);
                           return GestureDetector(
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ChatScreen(chat: chat),
+                                builder: (_) => ChatScreen(chat),
                               ),
                             ).then((value) {
                               setState(() {});
@@ -212,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: EdgeInsets.symmetric(
                                   horizontal: 20.0, vertical: 10.0),
                               decoration: BoxDecoration(
-                                color: lastmessage.unread
+                                color: chat.lastEntry?.message?.unread ?? false
                                     ? Color(0xFFFFEFEE)
                                     : Colors.white,
                                 borderRadius: BorderRadius.only(
@@ -232,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
                                           Text(
-                                            lastmessage.sender.nameOrDefault(),
+                                            chat.name,
                                             style: TextStyle(
                                               color: Colors.grey,
                                               fontSize: 15.0,
@@ -245,15 +235,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     .size
                                                     .width *
                                                 0.45,
-                                            child: Text(
-                                              lastmessage.content,
+                                            child: chat.lastEntry != null ? Text(
+                                              chat.lastEntry!.description,
                                               style: TextStyle(
                                                 color: Colors.blueGrey,
                                                 fontSize: 15.0,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                               overflow: TextOverflow.ellipsis,
-                                            ),
+                                            ) : null,
                                           ),
                                         ],
                                       ),
@@ -272,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
                                       SizedBox(height: 5.0),
-                                      lastmessage.unread
+                                      chat.lastEntry?.message?.unread ?? false
                                           ? Container(
                                               width: 40.0,
                                               height: 20.0,

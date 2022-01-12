@@ -40,12 +40,13 @@ class _ScanCodeScreenState extends State<ScanCodeScreen> {
           print("QR View created");
           controller.scannedDataStream.listen((scanData) {
             controller.pauseCamera();
-            RegExp exp = RegExp(r"palk:\/\/chat\?id=(.*.)&key=(.*)");
-            var match = exp.matchAsPrefix(scanData.code);
+            RegExp exp = RegExp(r"palk:\/\/chat\?id=(.*.)&key=(.*)&name=(.*)");
+            var match = exp.matchAsPrefix(scanData.code!);
             if(match != null) {
-              var id = match.group(1);
-              var key = match.group(2);
-              Chat.add(id, key);
+              var id = match.group(1)!;
+              var key = match.group(2)!;
+              var name = match.group(3)!;
+              Chat.add(id, key, name);
               controller.stopCamera();
               controller.dispose();
               Navigator.pop(context);
