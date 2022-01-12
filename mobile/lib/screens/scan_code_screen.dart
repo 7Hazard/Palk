@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
@@ -45,11 +47,15 @@ class _ScanCodeScreenState extends State<ScanCodeScreen> {
             if(match != null) {
               var id = match.group(1)!;
               var key = match.group(2)!;
-              var name = match.group(3)!;
-              Chat.add(id, key, name);
-              controller.stopCamera();
-              controller.dispose();
-              Navigator.pop(context);
+              var name = base64Decode(match.group(3)!).toString();
+              Chat.add(id, key, name).then((value) {
+                print("Joined chat '${name}'");
+                controller.stopCamera();
+                controller.dispose();
+                Navigator.pop(context);
+              }).catchError((e){
+                controller.resumeCamera();
+              });
             } else {
               controller.resumeCamera();
             }
