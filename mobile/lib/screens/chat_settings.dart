@@ -75,7 +75,7 @@ class _ChatSettingsState extends State<ChatSettings> {
             ),
             TextButton(
               onPressed: () {
-                Chat.remove(widget.chat!.id);
+                Chat.remove(widget.chat.id);
                 Navigator.pop(context);
                 Navigator.pop(context);
               },
