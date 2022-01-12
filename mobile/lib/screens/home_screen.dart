@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/chat_entry.dart';
 import 'package:flutter_chat_ui/screens/new_chat_screen.dart';
@@ -133,7 +136,49 @@ class _HomeScreenState extends State<HomeScreen> {
                 Icons.qr_code_scanner,
                 color: Colors.white,
               ),
-            )
+            ),
+
+            SizedBox(width: 10), // Padding
+
+            FloatingActionButton(
+              backgroundColor: Theme.of(context).primaryColor,
+              onPressed: () async {
+                try {
+                  var clipboard = await Clipboard.getData(Clipboard.kTextPlain);
+                  var url = clipboard!.text!;
+                  var match =
+                      RegExp(r"palk:\/\/chat\?id=(.*.)&key=(.*)&name=(.*)")
+                          .matchAsPrefix(url)!;
+                  var id = match.group(1)!;
+                  var key = match.group(2)!;
+                  var name =
+                      String.fromCharCodes(base64Decode(match.group(3)!));
+                  var chat = await Chat.get(id);
+                  if (chat == null) {
+                    chat = await Chat.add(id, key, name);
+                    print("Joined chat");
+                  } else {
+                    print("Already member of chat");
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatScreen(chat!),
+                    ),
+                  ).then((value) {
+                    setState(() {});
+                  });
+                } catch (e) {
+                  print("Invalid chat code in clipboard");
+                }
+              },
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              child: Icon(
+                Icons.pin,
+                color: Colors.white,
+              ),
+            ),
           ],
         ));
   }
