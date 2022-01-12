@@ -12,13 +12,7 @@ class Profile {
   Profile(this.id, {this.name, this.avatar});
 
   String nameOrDefault({String? def}) {
-    if (name == null) {
-      if (def == null)
-        return id.substring(id.length - 10);
-      else
-        return def;
-    } else
-      return name!;
+    return name ?? def ?? id.substring(id.length - 10);
   }
 
   static MethodChannel channel = () {
@@ -28,19 +22,30 @@ class Profile {
 
   static Map<String, Profile> cache = HashMap();
   static Future<Profile> get(String id, {String? name, String? avatar}) async {
-    bool update = false;
+    bool save = false;
     Profile? profile = cache[id];
     if (profile == null) {
       try {
         var json = jsonDecode(await Util.read("profile-${id}"));
-        profile = Profile(json["id"], name: json["name"], avatar: json["avatar"]);
+        profile =
+            Profile(json["id"], name: json["name"], avatar: json["avatar"]);
+        // Check if name has changed
+        if (name != null && profile.name != name) {
+          profile.name = name;
+          save = true;
+        }
+        // Check if avatar has changed
+        if (avatar != null && profile.avatar != avatar) {
+          profile.avatar = avatar;
+          save = true;
+        }
       } catch (e) {
         print("No profile by id '${id}', creating");
         profile = Profile(id, name: name, avatar: avatar);
-        update = true;
+        save = true;
       }
     }
-    if (update) await profile.save();
+    if (save) await profile.save();
     return profile;
   }
 

@@ -18,62 +18,79 @@ class NotificationService: UNNotificationServiceExtension {
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
         if let bestAttemptContent = bestAttemptContent {
-            bestAttemptContent.body = "kind"
-            let kind = bestAttemptContent.userInfo["kind"]! as! String
-            if kind == "message" {
-                do {
-                    bestAttemptContent.body = "chatid" // these are for debugging
-                    let chatid = bestAttemptContent.userInfo["chat"]! as! String
-                    bestAttemptContent.body = "read chats"
-                    let chats = try JSONDecoder().decode([String:Chat].self, from: Util.read("chats"))
-                    if let chat = chats[chatid] {
-                        let key = chat.key
-                        
-                        bestAttemptContent.body = "data"
-                        let encryptedData = bestAttemptContent.userInfo["data"]! as! String
-                        bestAttemptContent.body = "decrypt"
-                        let decryptedContent = try decryptData(key, encryptedData)
+            do {
+                bestAttemptContent.title = "chatid" // these are for debugging
+                let chatid = bestAttemptContent.userInfo["chat"]! as! String
+                bestAttemptContent.title = "read chats"
+                let chats = try JSONDecoder().decode([String:Chat].self, from: Util.read("chats"))
+                if let chat = chats[chatid] {
+                    let key = chat.key
+                    
+                    bestAttemptContent.title = "data"
+                    let encryptedData = bestAttemptContent.userInfo["data"]! as! String
+                    bestAttemptContent.title = "decrypt"
+                    let decryptedContent = try decryptData(key, encryptedData)
 
-                        struct MessageData: Decodable {
-                            let time: String
-                            let from: String
-                            let content: String
-                        }
-                        bestAttemptContent.body = "json"
-                        let data = try JSONDecoder().decode(
-                            MessageData.self,
-                            from: decryptedContent.data(using: .utf8)!
-                        )
-
-                        let entry = ChatEntry(
-                            time: data.time,
-                            kind: "message",
-                            message: Message(
-                                from: data.from,
-                                content: data.content
-                            )
-                        )
-                        chat.latestEntry = entry
-                        chat.updated = entry.time
-                        bestAttemptContent.body = "chats write"
-                        try Util.write("chats", try JSONEncoder().encode(chats))
-                        
-                        bestAttemptContent.body = "messages read"
-                        var messages = try JSONDecoder().decode([ChatEntry].self, from: try Util.read("chat-\(chatid)"))
-                        messages.append(entry)
-                        bestAttemptContent.body = "messages write"
-                        try Util.write("chat-\(chatid)", try JSONEncoder().encode(messages));
-                        
-                        // finally
-                        bestAttemptContent.title = chat.name
-                        bestAttemptContent.body = data.content
-                    } else {
-                        bestAttemptContent.title = "Unknown chat"
-                        bestAttemptContent.body = "Encrypted message"
+                    struct MessageData: Decodable {
+                        let from: String
+                        let content: String
                     }
-                } catch {
-                    bestAttemptContent.title = "Error"
+                    struct UserData: Decodable {
+                        let id: String
+                        let name: String?
+                        let avatar: String?
+                    }
+                    struct ChatData: Decodable {
+                        let kind: String
+                        let time: String
+                        let message: MessageData?
+                        let user: UserData?
+                    }
+                    bestAttemptContent.title = "json"
+                    let data = try JSONDecoder().decode(
+                        ChatData.self,
+                        from: decryptedContent.data(using: .utf8)!
+                    )
+
+                    var entry = ChatEntry(
+                        time: data.time,
+                        kind: data.kind
+                    )
+                    if data.kind == "message", let messageData = data.message {
+                        entry.message = Message(
+                            from: messageData.from,
+                            content: messageData.content
+                        )
+                        bestAttemptContent.body = messageData.content
+                    } else if data.kind == "join", let userData = data.user {
+                        let name = userData.name ?? String(userData.id.suffix(10))
+                        entry.kind = "event"
+                        entry.event = "\(name) joined"
+                        bestAttemptContent.body = entry.event!
+                    } else {
+                        bestAttemptContent.body = "ERROR: Unknown data kind"
+                    }
+                    
+                    // Finalize
+                    chat.latestEntry = entry
+                    chat.updated = entry.time
+                    bestAttemptContent.title = "chats write"
+                    try Util.write("chats", try JSONEncoder().encode(chats))
+                    
+                    bestAttemptContent.title = "messages read"
+                    var entries = try JSONDecoder().decode([ChatEntry].self, from: try Util.read("chat-\(chatid)"))
+                    entries.append(entry)
+                    bestAttemptContent.title = "messages write"
+                    try Util.write("chat-\(chatid)", try JSONEncoder().encode(entries));
+                    
+                    bestAttemptContent.title = chat.name
+                    
+                } else {
+                    bestAttemptContent.title = "Unknown chat"
+                    bestAttemptContent.body = "ERROR: Encrypted message"
                 }
+            } catch {
+                bestAttemptContent.body = "Error"
             }
             
             contentHandler(bestAttemptContent)

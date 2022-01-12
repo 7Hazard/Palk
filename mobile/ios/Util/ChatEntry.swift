@@ -12,6 +12,7 @@ struct Message: Codable {
 
 struct ChatEntry: Codable {
     let time: String
-    let kind: String
-    let message: Message?
+    var kind: String
+    var message: Message?
+    var event: String?
 }

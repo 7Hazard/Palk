@@ -19,16 +19,18 @@ class _ChatScreenState extends State<ChatScreen> {
   var dateFormatter = new DateFormat('yyyy-MM-dd');
   List<ChatEntry>? _messages;
 
-  Future<List<ChatEntry>> get messages async {
+  /// Cached
+  Future<List<ChatEntry>> get entries async {
     if (_messages != null) return _messages!;
     _messages = await widget.chat.entries;
     _messages!.sort((a, b) => b.time.compareTo(a.time));
     print("loaded messages");
     widget.chat.read = DateTime.now(); // TODO handle read flag better
+    widget.chat.save();
     return _messages!;
   }
 
-  Future onMessage(Chat chat, ChatEntry message) async {
+  Future onActivity(Chat chat, ChatEntry message) async {
     if (_messages != null) {
       setState(() {
         widget.chat.read = DateTime.now();
@@ -40,12 +42,12 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    Chat.subscribeOnActivity(onMessage);
+    Chat.subscribeOnActivity(onActivity);
   }
 
   @override
   void dispose() {
-    Chat.unsubscribeOnActivity(onMessage);
+    Chat.unsubscribeOnActivity(onActivity);
     super.dispose();
   }
 
@@ -164,7 +166,7 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
-          "Unnamed chat", // TODO if only one participant, show his name
+          widget.chat.name,
           style: TextStyle(
             fontSize: 28.0,
             fontWeight: FontWeight.bold,
@@ -206,18 +208,31 @@ class _ChatScreenState extends State<ChatScreen> {
                     topRight: Radius.circular(30.0),
                   ),
                   child: FutureBuilder(
-                    future: messages,
+                    future: entries,
                     builder: (BuildContext context,
                         AsyncSnapshot<List<ChatEntry>> snapshot) {
                       if (snapshot.hasData) {
-                        var messages = snapshot.data!;
+                        var entries = snapshot.data!;
                         return ListView.builder(
                           reverse: true,
                           padding: EdgeInsets.only(top: 15.0),
-                          itemCount: messages.length,
+                          itemCount: entries.length,
                           itemBuilder: (BuildContext context, int index) {
-                            final ChatEntry entry = messages[index];
-                            return _buildMessage(entry);
+                            final ChatEntry entry = entries[index];
+                            switch (entry.kind) {
+                              case "message":
+                                return _buildMessage(entry);
+                              case "event":
+                                return Center(
+                                  child: Text(
+                                    entry.event ?? "Error getting event",
+                                  ),
+                                );
+                              default:
+                                return Center(
+                                  child: Text("Unknown kind '${entry.kind}'"),
+                                );
+                            }
                           },
                         );
                       } else {

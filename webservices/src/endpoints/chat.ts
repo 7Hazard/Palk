@@ -1,9 +1,9 @@
 import { jsonResponse } from "../helpers";
 import { Endpoint } from "../interfaces/Endpoint";
 
-export const messages: Endpoint[] = [
+export const chat: Endpoint[] = [
     {
-        method: "POST", path: "/messages", handler: async req => {
+        method: "POST", path: "/chat", handler: async req => {
             let json = await req.json<{
                 chat: string,
                 data: string,
@@ -20,11 +20,7 @@ export const messages: Endpoint[] = [
                     "body": "-",
                     "sound": "default"
                 },
-                "data": {
-                    "kind": "message",
-                    "chat": json.chat,
-                    "data": json.data
-                },
+                "data": json,
                 "content_available": true,
                 "priority": "high",
                 "mutable_content": true

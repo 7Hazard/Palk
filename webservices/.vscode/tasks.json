@@ -6,6 +6,12 @@
 			"label": "dev",
 			"command": "wrangler dev",
 			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label": "publish",
+			"command": "wrangler publish",
+			"group": "build"
 		}
 	]
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../util.dart';
+
 class ChatSettings extends StatefulWidget {
   final Chat chat;
 
@@ -28,6 +30,7 @@ class _ChatSettingsState extends State<ChatSettings> {
               child: TextButton(
                 onPressed: () {
                   widget.chat.copyUrlToClipboard();
+                  Util.snackbar(context, "Copied chat code to clipboard");
                 },
                 child: CircleAvatar(
                   radius: 82,
@@ -76,6 +79,7 @@ class _ChatSettingsState extends State<ChatSettings> {
             TextButton(
               onPressed: () {
                 Chat.remove(widget.chat.id);
+                Util.snackbar(context, 'Left ${widget.chat.name}');
                 Navigator.pop(context);
                 Navigator.pop(context);
               },
@@ -83,7 +87,7 @@ class _ChatSettingsState extends State<ChatSettings> {
                 primary: Colors.red,
               ),
               child: Text(
-                'Leave chat',
+                'Leave',
                 style: TextStyle(fontSize: 16),
               ),
             )

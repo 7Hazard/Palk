@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 
@@ -22,29 +23,34 @@ class Util {
   }
 
   static MethodChannel channel = () {
-    void message(dynamic args) async {
-      var chatid = args["chat"];
-      var chat = await Chat.get(chatid);
-      var data = args["data"];
-      var decrypted = await chat!.decrypt(data);
-      var json = jsonDecode(decrypted);
-      var entry = ChatEntry(DateTime.parse(json["time"]), "message",
-          message: Message(
-            await Profile.get(json["from"]),
-            json["content"],
-          ));
-      chat.messageReceived(entry);
-    }
-
     void notification(dynamic args) async {
-      var kind = args["kind"];
+      var chatid = args["chat"];
+      var chat = (await Chat.get(chatid))!;
+      var data = jsonDecode(await chat.decrypt(args["data"]));
+
+      var kind = data["kind"];
+      var entry = ChatEntry(DateTime.parse(data["time"]), kind);
+
       switch (kind) {
         case "message":
-          message(args);
+          var message = data["message"];
+          entry.message = Message(
+            await Profile.get(message["from"]),
+            message["content"],
+          );
+          break;
+        case "join":
+          entry.kind = "event";
+          var user = data["user"];
+          var profile = await Profile.get(user["id"],
+              name: user["name"], avatar: user["avatar"]);
+          entry.event = "${profile.nameOrDefault()} joined";
           break;
         default:
           return print("Unknown notification kind '${kind}'");
       }
+
+      chat.onChatEntry(entry);
     }
 
     var channel = MethodChannel('solutions.desati.palk');
@@ -58,6 +64,7 @@ class Util {
           throw MissingPluginException('No such method');
       }
     });
+
     return channel;
   }();
 
@@ -66,5 +73,11 @@ class Util {
     Random r = Random();
     return String.fromCharCodes(
         Iterable.generate(length, (_) => ch.codeUnitAt(r.nextInt(ch.length))));
+  }
+
+  static void snackbar(BuildContext context, String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(text),
+    ));
   }
 }

@@ -1,4 +1,4 @@
-import { messages } from "./endpoints/messages";
+import { chat } from "./endpoints/chat";
 import { jsonResponse } from "./helpers";
 import { Endpoint } from "./interfaces/Endpoint";
 
@@ -6,7 +6,7 @@ const apiPathPrefix = "/api/v1"
 
 let endpoints: Endpoint[] = [
   { method: "GET", path: "/", handler: async _ => jsonResponse(endpoints.map(endpoint => endpoint.path.replace(apiPathPrefix, ""))) },
-  ...messages
+  ...chat
 ]
 
 for (const endpoint of endpoints) {

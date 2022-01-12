@@ -46,6 +46,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
                       child: TextButton(
                         onPressed: () {
                           chat.copyUrlToClipboard();
+                          Util.snackbar(
+                              context, "Copied chat code to clipboard");
                         },
                         child: QrImage(
                           data: chat.url,

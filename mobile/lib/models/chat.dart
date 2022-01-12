@@ -79,18 +79,40 @@ class Chat {
     await Util.write("chats", json);
   }
 
-  static Future<Chat?> get(String chatid) async {
-    return (await all)[chatid];
+  Future<void> save() async {
+    await saveAll();
+  }
+
+  static Future<Chat?> get(String id) async {
+    return (await all)[id];
   }
 
   static Future<Chat> add(String id, String key, String name) async {
-    var chat = cache!.putIfAbsent(
+    var chat = await get(id);
+    if (chat != null) return chat;
+
+    chat = cache!.putIfAbsent(
         id,
         () => Chat(id, key, name, DateTime.now(), DateTime.now(),
             latestEntry: null));
+
     Util.write("chat-${id}", "[]");
     saveAll();
-    await FirebaseMessaging.instance.subscribeToTopic(id);
+    FirebaseMessaging.instance.subscribeToTopic(id);
+
+    // Send join event
+    var data = jsonEncode({
+      "kind": "join",
+      "time": DateTime.now().toUtc().toIso8601String(),
+      "user": Profile.current!.object
+    });
+    chat.encrypt(data).then((encryptedData) async {
+      var url = Uri.parse('https://palk.7hazard.workers.dev/chat');
+      var response = await http.post(url,
+          body: jsonEncode({"chat": id, "data": encryptedData}));
+      print("Join notification status: ${response.statusCode}");
+    });
+
     return chat;
   }
 
@@ -102,28 +124,35 @@ class Chat {
   }
 
   Future<bool> sendMessage(String message) async {
+    var data = jsonEncode({
+      "kind": "message",
+      "time": DateTime.now().toUtc().toIso8601String(),
+      "message": {
+        "from": Profile.current!.id,
+        "content": message,
+      }
+    });
+
+    var encryptedData = await encrypt(data);
+
+    var url = Uri.parse('https://palk.7hazard.workers.dev/chat');
+    var response = await http.post(url,
+        body: jsonEncode({"chat": id, "data": encryptedData}));
+    return response.statusCode == 200;
+  }
+
+  Future<String> encrypt(String data) async {
+    // Encrypt
     final algorithm = AesGcm.with256bits(nonceLength: 12);
     final secretKey = await algorithm.newSecretKeyFromBytes(utf8.encode(key));
     final nonce = algorithm.newNonce();
-
-    var data = jsonEncode({
-      "time": DateTime.now().toUtc().toIso8601String(),
-      "from": Profile.current!.id,
-      "content": message,
-    });
-
-    // Encrypt
     final secretBox = await algorithm.encrypt(
       utf8.encode(data),
       secretKey: secretKey,
       nonce: nonce,
     );
     var encryptedData = base64Encode(secretBox.concatenation());
-
-    var url = Uri.parse('https://palk.7hazard.workers.dev/messages');
-    var response = await http.post(url,
-        body: jsonEncode({"chat": id, "data": encryptedData}));
-    return response.statusCode == 200;
+    return encryptedData;
   }
 
   /// Decrypts data using chat's key
@@ -162,7 +191,7 @@ class Chat {
     onActivityHandlers.remove(fn);
   }
 
-  void messageReceived(ChatEntry message) {
+  void onChatEntry(ChatEntry message) {
     latestEntry = message;
     updated = message.time;
     onActivityHandlers.forEach((fn) {

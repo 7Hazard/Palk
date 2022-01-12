@@ -7,6 +7,7 @@ import 'package:flutter_chat_ui/models/chat_entry.dart';
 import 'package:flutter_chat_ui/screens/new_chat_screen.dart';
 import 'package:flutter_chat_ui/screens/profile_settings_screen.dart';
 import 'package:flutter_chat_ui/screens/scan_code_screen.dart';
+import 'package:flutter_chat_ui/util.dart';
 import 'package:intl/intl.dart';
 
 import 'chat_screen.dart';
@@ -68,9 +69,9 @@ class _HomeScreenState extends State<HomeScreen> {
           elevation: 0.0,
           actions: <Widget>[
             IconButton(
-              icon: Icon(Icons.access_alarm),
+              icon: Icon(Icons.help_outline),
               iconSize: 30.0,
-              color: Colors.black,
+              color: Colors.white,
               onPressed: () {},
             ),
           ],
@@ -154,11 +155,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   var name =
                       String.fromCharCodes(base64Decode(match.group(3)!));
                   var chat = await Chat.get(id);
-                  if (chat == null) {
-                    chat = await Chat.add(id, key, name);
-                    print("Joined chat");
+                  if (chat != null) {
+                    Util.snackbar(context, 'Already member of ${name}');
                   } else {
-                    print("Already member of chat");
+                    chat = await Chat.add(id, key, name);
+                    Util.snackbar(context, 'Joined ${name}');
                   }
                   Navigator.push(
                     context,
@@ -170,6 +171,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   });
                 } catch (e) {
                   print("Invalid chat code in clipboard");
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Invalid chat code in clipboard'),
+                  ));
                 }
               },
               shape: RoundedRectangleBorder(
@@ -230,18 +234,21 @@ class _HomeScreenState extends State<HomeScreen> {
                               setState(() {});
                             }),
                             child: Container(
-                              margin: EdgeInsets.only(
-                                  top: 5.0, bottom: 5.0, right: 20.0),
+                              // margin: EdgeInsets.only(
+                              //   top: 5.0,
+                              //   bottom: 5.0,
+                              // ),
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 20.0, vertical: 10.0),
+                                  horizontal: 20.0, vertical: 20.0),
                               decoration: BoxDecoration(
                                 color: chat.updated.isAfter(chat.read)
                                     ? Color(0xFFFFEFEE)
                                     : Colors.white,
-                                borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20.0),
-                                  bottomRight: Radius.circular(20.0),
-                                ),
+                                // borderRadius: BorderRadius.only(
+                                //   topRight: Radius.circular(20.0),
+                                //   bottomRight: Radius.circular(20.0),
+                                // ),
+                                border: Border.all(color: Colors.black45)
                               ),
                               child: Row(
                                 mainAxisAlignment:

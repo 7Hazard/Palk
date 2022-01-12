@@ -2,15 +2,18 @@ import 'message.dart';
 
 class ChatEntry {
   final DateTime time;
-  final String kind;
-  final Message? message;
+  String kind;
+  Message? message;
+  String? event;
 
-  ChatEntry(this.time, this.kind, {this.message = null});
+  ChatEntry(this.time, this.kind, {this.message, this.event});
 
   String get description {
     switch (kind) {
       case "message":
         return message?.content ?? "#1";
+      case "event":
+        return event ?? "#2";
       default:
         return "#0";
     }
@@ -19,7 +22,8 @@ class ChatEntry {
   get object => {
         "time": time.toUtc().toIso8601String(),
         "kind": kind,
-        "message": message?.object
+        "message": message?.object,
+        "event": event
       };
 
   static Future<ChatEntry?> fromObject(entry) async {
@@ -29,6 +33,7 @@ class ChatEntry {
         DateTime.parse(entry["time"]),
         entry["kind"],
         message: await Message.fromObject(entry["message"]),
+        event: entry["event"]
       );
       return message;
     } catch (e) {
@@ -39,6 +44,6 @@ class ChatEntry {
 
   @override
   String toString() {
-    return "ChatEntry(time: ${time})";
+    return "ChatEntry(time: ${time}, kind: ${kind}, message: ${message}, event: ${event})";
   }
 }
