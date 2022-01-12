@@ -9,6 +9,7 @@ class Chat: Codable {
     let id: String
     let key: String
     let name: String
-    var lastUpdate: String?
-    var lastEntry: ChatEntry?
+    var updated: String
+    var read: String
+    var latestEntry: ChatEntry?
 }

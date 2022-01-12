@@ -32,7 +32,7 @@ class Profile {
     Profile? profile = cache[id];
     if (profile == null) {
       try {
-        var json = jsonDecode(await read("profile-${id}"));
+        var json = jsonDecode(await Util.read("profile-${id}"));
         profile = Profile(json["id"], name: json["name"], avatar: json["avatar"]);
       } catch (e) {
         print("No profile by id '${id}', creating");
@@ -47,7 +47,7 @@ class Profile {
   static Profile? current = null;
 
   Future<void> save() async {
-    await write("profile-${id}", json);
+    await Util.write("profile-${id}", json);
   }
 
   dynamic get object {

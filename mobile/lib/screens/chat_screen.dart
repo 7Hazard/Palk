@@ -17,14 +17,36 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   var dateFormatter = new DateFormat('yyyy-MM-dd');
-  List<ChatEntry?>? _messages;
+  List<ChatEntry>? _messages;
 
-  Future<List<ChatEntry?>?> get messages async {
-    if (_messages != null) return _messages;
-    _messages = await widget.chat!.entries;
-    _messages!.sort((a, b) => b!.time.compareTo(a!.time));
+  Future<List<ChatEntry>> get messages async {
+    if (_messages != null) return _messages!;
+    _messages = await widget.chat.entries;
+    _messages!.sort((a, b) => b.time.compareTo(a.time));
     print("loaded messages");
-    return _messages;
+    widget.chat.read = DateTime.now(); // TODO handle read flag better
+    return _messages!;
+  }
+
+  Future onMessage(Chat chat, ChatEntry message) async {
+    if (_messages != null) {
+      setState(() {
+        widget.chat.read = DateTime.now();
+        _messages!.insert(0, message);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Chat.subscribeOnActivity(onMessage);
+  }
+
+  @override
+  void dispose() {
+    Chat.unsubscribeOnActivity(onMessage);
+    super.dispose();
   }
 
   _buildMessage(ChatEntry entry) {
@@ -43,7 +65,7 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
       width: MediaQuery.of(context).size.width * 0.75,
       decoration: BoxDecoration(
-        color: isMe ? Theme.of(context).accentColor : Color(0xFFFFEFEE),
+        color: isMe ? Theme.of(context).colorScheme.secondary: Color(0xFFFFEFEE),
         borderRadius: isMe
             ? BorderRadius.only(
                 topLeft: Radius.circular(15.0),
@@ -125,33 +147,13 @@ class _ChatScreenState extends State<ChatScreen> {
             iconSize: 25.0,
             color: Theme.of(context).primaryColor,
             onPressed: () {
-              widget.chat!.sendMessage(textController.text);
+              widget.chat.sendMessage(textController.text);
               textController.clear();
             },
           ),
         ],
       ),
     );
-  }
-
-  Future onMessage(Chat chat, ChatEntry message) async {
-    if (_messages != null) {
-      setState(() {
-        _messages!.insert(0, message);
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    Chat.subscribeOnActivity(onMessage);
-  }
-
-  @override
-  void dispose() {
-    Chat.unsubscribeOnActivity(onMessage);
-    super.dispose();
   }
 
   @override
@@ -207,7 +209,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: FutureBuilder(
                     future: messages,
                     builder: (BuildContext context,
-                        AsyncSnapshot<List<ChatEntry?>?> snapshot) {
+                        AsyncSnapshot<List<ChatEntry>> snapshot) {
                       if (snapshot.hasData) {
                         var messages = snapshot.data!;
                         return ListView.builder(
@@ -215,7 +217,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           padding: EdgeInsets.only(top: 15.0),
                           itemCount: messages.length,
                           itemBuilder: (BuildContext context, int index) {
-                            final ChatEntry entry = messages[index]!;
+                            final ChatEntry entry = messages[index];
                             return _buildMessage(entry);
                           },
                         );

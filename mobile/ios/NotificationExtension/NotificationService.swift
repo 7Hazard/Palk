@@ -50,12 +50,11 @@ class NotificationService: UNNotificationServiceExtension {
                             kind: "message",
                             message: Message(
                                 from: data.from,
-                                content: data.content,
-                                unread: true
+                                content: data.content
                             )
                         )
-                        chat.lastEntry = entry
-                        chat.lastUpdate = entry.time
+                        chat.latestEntry = entry
+                        chat.updated = entry.time
                         bestAttemptContent.body = "chats write"
                         try Util.write("chats", try JSONEncoder().encode(chats))
                         

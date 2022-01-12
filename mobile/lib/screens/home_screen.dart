@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/chat_entry.dart';
-import 'package:flutter_chat_ui/models/profile.dart';
 import 'package:flutter_chat_ui/screens/new_chat_screen.dart';
 import 'package:flutter_chat_ui/screens/profile_settings_screen.dart';
 import 'package:flutter_chat_ui/screens/scan_code_screen.dart';
@@ -78,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).accentColor,
+                  color: Theme.of(context).colorScheme.secondary,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(30.0),
                     topRight: Radius.circular(30.0),
@@ -171,18 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ]);
                     } else {
                       var chats = chatsMap.values.toList();
-                      // [a, b, c, null, null]
-                      chats.sort((a, b) {
-                        if (a.lastUpdate == null && b.lastUpdate == null) {
-                          return 0;
-                        } else if (a.lastUpdate == null) {
-                          return 1;
-                        } else if (b.lastUpdate == null) {
-                          return -1;
-                        } else {
-                          return b.lastUpdate.compareTo(a.lastUpdate);
-                        }
-                      });
+                      chats.sort((a, b) => b.updated.compareTo(a.updated));
                       return ListView.builder(
                         itemCount: chats.length,
                         itemBuilder: (BuildContext context, int index) {
@@ -202,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: EdgeInsets.symmetric(
                                   horizontal: 20.0, vertical: 10.0),
                               decoration: BoxDecoration(
-                                color: chat.lastEntry?.message?.unread ?? false
+                                color: chat.updated.isAfter(chat.read)
                                     ? Color(0xFFFFEFEE)
                                     : Colors.white,
                                 borderRadius: BorderRadius.only(
@@ -235,15 +223,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     .size
                                                     .width *
                                                 0.45,
-                                            child: chat.lastEntry != null ? Text(
-                                              chat.lastEntry!.description,
-                                              style: TextStyle(
-                                                color: Colors.blueGrey,
-                                                fontSize: 15.0,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ) : null,
+                                            child: chat.latestEntry != null
+                                                ? Text(
+                                                    chat.latestEntry!
+                                                        .description,
+                                                    style: TextStyle(
+                                                      color: Colors.blueGrey,
+                                                      fontSize: 15.0,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  )
+                                                : null,
                                           ),
                                         ],
                                       ),
@@ -254,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Text(
                                         DateFormat("yyyy-MM-dd").format(
                                             DateTime.parse(
-                                                chat.lastUpdate.toString())),
+                                                chat.updated.toString())),
                                         style: TextStyle(
                                           color: Colors.grey,
                                           fontSize: 15.0,
@@ -262,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
                                       SizedBox(height: 5.0),
-                                      chat.lastEntry?.message?.unread ?? false
+                                      chat.updated.isAfter(chat.read)
                                           ? Container(
                                               width: 40.0,
                                               height: 20.0,

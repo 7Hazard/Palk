@@ -1,32 +1,4 @@
-import 'profile.dart';
-
-class Message {
-  final Profile from;
-  final String content;
-  bool unread;
-
-  Message(this.from, this.content, this.unread);
-
-  get object => {
-        "from": from.id,
-        "content": content,
-        "unread": unread,
-      };
-
-  static Future<Message?> fromObject(msg) async {
-    if (msg == null) return null;
-    try {
-      return Message(
-        await Profile.get(msg["from"]),
-        msg["content"],
-        msg["unread"],
-      );
-    } catch (e) {
-      print("Could not create from object ${e}");
-      return null;
-    }
-  }
-}
+import 'message.dart';
 
 class ChatEntry {
   final DateTime time;
@@ -37,8 +9,10 @@ class ChatEntry {
 
   String get description {
     switch (kind) {
-      case "message": return message?.content ?? "€1";
-      default: return "€0";
+      case "message":
+        return message?.content ?? "#1";
+      default:
+        return "#0";
     }
   }
 
