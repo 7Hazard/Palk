@@ -13,12 +13,14 @@ class NewChatScreen extends StatefulWidget {
 }
 
 class _NewChatScreenState extends State<NewChatScreen> {
+  TextEditingController groupNameController = new TextEditingController();
+
+  var id = Uuid().v1();
+  var key = Util.randomString(32);
+  String? name;
+
   @override
   Widget build(BuildContext context) {
-    var id = Uuid().v1();
-    var key = Util.randomString(32);
-    var name = "New chat";
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -37,33 +39,53 @@ class _NewChatScreenState extends State<NewChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Center(
-            child: FutureBuilder(
-                future: Chat.add(id, key, name),
-                builder: (context, AsyncSnapshot<Chat> snapshot) {
-                  if (snapshot.hasData) {
-                    var chat = snapshot.data!;
-                    return Padding(
-                      child: TextButton(
-                        onPressed: () {
-                          chat.copyUrlToClipboard();
-                          Util.snackbar(
-                              context, "Copied chat code to clipboard");
+              child: name != null
+                  ? FutureBuilder(
+                      future: Chat.add(id, key, name!),
+                      builder: (context, AsyncSnapshot<Chat> snapshot) {
+                        if (snapshot.hasData) {
+                          var chat = snapshot.data!;
+                          return Column(children: [
+                            Padding(
+                              child: TextButton(
+                                onPressed: () {
+                                  chat.copyUrlToClipboard();
+                                  Util.snackbar(
+                                      context, "Copied chat code to clipboard");
+                                },
+                                child: QrImage(
+                                  data: chat.url,
+                                  version: QrVersions.auto,
+                                  size: 200.0, // Determines QR-code size
+                                ),
+                              ),
+                              padding: EdgeInsets.only(bottom: 30),
+                            ),
+                            Padding(
+                                child:
+                                    Text('Scan the QR-code to join the chat'),
+                                padding: EdgeInsets.only(bottom: 150)),
+                          ]);
+                        } else
+                          return Text("");
+                      })
+                  : Center(
+                      child: TextField(
+                        keyboardType: TextInputType.text,
+                        onSubmitted: (value) {
+                          print(value);
+                          setState(() {
+                            name = value;
+                          });
                         },
-                        child: QrImage(
-                          data: chat.url,
-                          version: QrVersions.auto,
-                          size: 200.0, // Determines QR-code size
-                        ),
+                        controller: groupNameController,
+                        decoration: InputDecoration(
+                            contentPadding:
+                                EdgeInsets.only(left: 16, top: 25, right: 16),
+                            labelText: 'Enter new Groupname here...',
+                            hintText: ' '),
                       ),
-                      padding: EdgeInsets.only(bottom: 30),
-                    );
-                  } else
-                    return Text("");
-                }),
-          ),
-          Padding(
-              child: Text('Scan the QR-code to join the chat'),
-              padding: EdgeInsets.only(bottom: 150)),
+                    )),
         ],
       ),
     );
