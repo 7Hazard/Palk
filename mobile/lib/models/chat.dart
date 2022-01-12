@@ -116,11 +116,24 @@ class Chat {
     return chat;
   }
 
-  static Future<void> remove(String id) async {
+  Future<void> remove() async {
     cache?.remove(id);
     Util.delete("chat-${id}");
     saveAll();
-    await FirebaseMessaging.instance.unsubscribeFromTopic(id);
+    FirebaseMessaging.instance.unsubscribeFromTopic(id);
+    
+    // Send join event
+    var data = jsonEncode({
+      "kind": "leave",
+      "time": DateTime.now().toUtc().toIso8601String(),
+      "user": Profile.current!.object
+    });
+    encrypt(data).then((encryptedData) async {
+      var url = Uri.parse('https://palk.7hazard.workers.dev/chat');
+      var response = await http.post(url,
+          body: jsonEncode({"chat": id, "data": encryptedData}));
+      print("Leave notification status: ${response.statusCode}");
+    });
   }
 
   Future<bool> sendMessage(String message) async {

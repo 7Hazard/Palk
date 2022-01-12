@@ -40,11 +40,13 @@ class Util {
           );
           break;
         case "join":
+        case "leave":
           entry.kind = "event";
           var user = data["user"];
           var profile = await Profile.get(user["id"],
               name: user["name"], avatar: user["avatar"]);
-          entry.event = "${profile.nameOrDefault()} joined";
+          entry.event =
+              "${profile.nameOrDefault()} ${kind == "join" ? "joined" : "left"}";
           break;
         default:
           return print("Unknown notification kind '${kind}'");

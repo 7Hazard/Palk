@@ -30,7 +30,7 @@ class NotificationService: UNNotificationServiceExtension {
                     let encryptedData = bestAttemptContent.userInfo["data"]! as! String
                     bestAttemptContent.title = "decrypt"
                     let decryptedContent = try decryptData(key, encryptedData)
-
+                    
                     struct MessageData: Decodable {
                         let from: String
                         let content: String
@@ -51,23 +51,32 @@ class NotificationService: UNNotificationServiceExtension {
                         ChatData.self,
                         from: decryptedContent.data(using: .utf8)!
                     )
-
+                    
                     var entry = ChatEntry(
                         time: data.time,
                         kind: data.kind
                     )
+                    
                     if data.kind == "message", let messageData = data.message {
                         entry.message = Message(
                             from: messageData.from,
                             content: messageData.content
                         )
                         bestAttemptContent.body = messageData.content
-                    } else if data.kind == "join", let userData = data.user {
+                    }
+                    else if data.kind == "join", let userData = data.user {
                         let name = userData.name ?? String(userData.id.suffix(10))
                         entry.kind = "event"
                         entry.event = "\(name) joined"
                         bestAttemptContent.body = entry.event!
-                    } else {
+                    }
+                    else if data.kind == "leave", let userData = data.user {
+                        let name = userData.name ?? String(userData.id.suffix(10))
+                        entry.kind = "event"
+                        entry.event = "\(name) left"
+                        bestAttemptContent.body = entry.event!
+                    }
+                    else {
                         bestAttemptContent.body = "ERROR: Unknown data kind"
                     }
                     
@@ -110,13 +119,13 @@ class NotificationService: UNNotificationServiceExtension {
 func decryptData(_ key: String, _ message: String) throws -> String {
     let key = SymmetricKey(data: key.data(using: .utf8)!)
     let data = Data(base64Encoded: message)!
-
+    
     let nonce = data[0...11] // = initialization vector
     let tag = data[data.count-16...data.count-1]
     let ciphertext = data[12...data.count-17]
-
+    
     let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonce), ciphertext: ciphertext, tag: tag)
-
+    
     let decryptedData = try AES.GCM.open(sealedBox, using: key)
     return String(decoding: decryptedData, as: UTF8.self)
 }
