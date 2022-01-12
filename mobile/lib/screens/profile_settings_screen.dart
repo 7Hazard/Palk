@@ -7,6 +7,12 @@ class ProfileSettings extends StatefulWidget {
 }
 
 class _ProfileSettingsState extends State<ProfileSettings> {
+  RegExp regEx = new RegExp(
+    r'[!@#<>?":_`~;[\]\\|=+)(*&^%0-9-\s*]', //Ignore these characters (\s* = whitespace)
+    caseSensitive: false,
+    multiLine: false,
+  );
+
   TextEditingController usernameController = new TextEditingController();
 
   @override
@@ -62,7 +68,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
               TextButton(
                 onPressed: () {
                   setState(() {
-                    if (!usernameController.text.isEmpty) {
+                    if (!usernameController.text.isEmpty &&
+                        !regEx.hasMatch(usernameController.text)) {
                       Profile.current!.name = usernameController.text;
                     }
                   });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/chat_entry.dart';
 import 'package:flutter_chat_ui/models/profile.dart';
+import 'package:intl/intl.dart';
 
 import 'chat_settings.dart';
 
@@ -15,6 +16,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  var dateFormatter = new DateFormat('yyyy-MM-dd');
   List<ChatEntry?>? _messages;
 
   Future<List<ChatEntry?>?> get messages async {
@@ -56,7 +58,7 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            entry.time.toString(),
+            dateFormatter.format(entry.time),
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 16.0,
