@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:flutter_chat_ui/models/chat_entry.dart';
+import 'package:flutter_chat_ui/models/profile.dart';
 import 'package:flutter_chat_ui/screens/new_chat_screen.dart';
 import 'package:flutter_chat_ui/screens/profile_settings_screen.dart';
 import 'package:flutter_chat_ui/screens/scan_code_screen.dart';
@@ -18,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  TextEditingController usernameController = new TextEditingController();
+
   Future onChatActivity(Chat chat, ChatEntry entry) async {
     setState(() {});
   }
@@ -36,6 +39,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (Profile.current!.name == null) {
+      return AlertDialog(
+        title: Text('Your name: '),
+        content: TextField(
+          decoration: InputDecoration(hintText: 'Enter name here...'),
+          onSubmitted: (value) {
+            setState(() {
+              Profile.current!.name = value;
+              Profile.current!.save();
+            });
+          },
+        ),
+      );
+    }
+
     return Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
         appBar: AppBar(
@@ -241,15 +259,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: EdgeInsets.symmetric(
                                   horizontal: 20.0, vertical: 20.0),
                               decoration: BoxDecoration(
-                                color: chat.updated.isAfter(chat.read)
-                                    ? Color(0xFFFFEFEE)
-                                    : Colors.white,
-                                // borderRadius: BorderRadius.only(
-                                //   topRight: Radius.circular(20.0),
-                                //   bottomRight: Radius.circular(20.0),
-                                // ),
-                                border: Border.all(color: Colors.black45)
-                              ),
+                                  color: chat.updated.isAfter(chat.read)
+                                      ? Color(0xFFFFEFEE)
+                                      : Colors.white,
+                                  // borderRadius: BorderRadius.only(
+                                  //   topRight: Radius.circular(20.0),
+                                  //   bottomRight: Radius.circular(20.0),
+                                  // ),
+                                  border: Border.all(color: Colors.black45)),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
