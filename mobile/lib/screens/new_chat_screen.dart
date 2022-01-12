@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -17,10 +20,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
   Widget build(BuildContext context) {
     var id = Uuid().v1();
     var key = Util.randomString(32);
-    print(key);
-    print(key.length);
     var name = "New chat";
-    Chat.add(id, key, name);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -40,14 +40,31 @@ class _NewChatScreenState extends State<NewChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Center(
-            child: QrImage(
-              data: "palk://chat?id=${id}&key=${key}&name=${name}",
-              version: QrVersions.auto,
-              size: 200.0, // Determines QR-code size
-            ),
+            child: FutureBuilder(
+                future: Chat.add(id, key, name),
+                builder: (context, AsyncSnapshot<Chat> snapshot) {
+                  if (snapshot.hasData) {
+                    var chat = snapshot.data!;
+                    return Padding(
+                      child: TextButton(
+                        onPressed: () {
+                          chat.copyUrlToClipboard();
+                        },
+                        child: QrImage(
+                          data: chat.url,
+                          version: QrVersions.auto,
+                          size: 200.0, // Determines QR-code size
+                        ),
+                      ),
+                      padding: EdgeInsets.only(bottom: 30),
+                    );
+                  } else
+                    return Text("");
+                }),
           ),
-          Padding(padding: EdgeInsets.all(50)),
-          Text('Scan QR-code with camera to create a new chat.')
+          Padding(
+              child: Text('Scan the QR-code to join the chat'),
+              padding: EdgeInsets.only(bottom: 150)),
         ],
       ),
     );

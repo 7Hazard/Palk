@@ -3,9 +3,9 @@ import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class ChatSettings extends StatefulWidget {
-  final Chat? chat;
+  final Chat chat;
 
-  ChatSettings({this.chat});
+  ChatSettings(this.chat);
 
   @override
   _ChatSettingsState createState() => _ChatSettingsState();
@@ -25,18 +25,22 @@ class _ChatSettingsState extends State<ChatSettings> {
             child: new Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 50.0, horizontal: 0.0),
-              child: CircleAvatar(
-                radius: 82,
-                backgroundColor: Colors.grey,
+              child: TextButton(
+                onPressed: () {
+                  widget.chat.copyUrlToClipboard();
+                },
                 child: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: QrImage(
-                    data:
-                        "palk://chat?id=${widget.chat!.id}&key=${widget.chat!.key}",
-                    version: QrVersions.auto,
-                    size: 100.0, // Determines QR-code size
+                  radius: 82,
+                  backgroundColor: Colors.grey,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: QrImage(
+                      data: widget.chat.url,
+                      version: QrVersions.auto,
+                      size: 100.0, // Determines QR-code size
+                    ),
+                    radius: 200,
                   ),
-                  radius: 200,
                 ),
               ),
             ),

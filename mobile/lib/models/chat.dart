@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/profile.dart';
 import 'package:flutter_chat_ui/util.dart';
 import 'package:http/http.dart' as http;
@@ -36,6 +37,16 @@ class Chat {
       "read": read.toUtc().toIso8601String(),
       "latestEntry": latestEntry?.object,
     };
+  }
+
+  get url {
+    var encodedName = base64Encode(utf8.encode(name));
+    return "palk://chat?id=${id}&key=${key}&name=${encodedName}";
+  }
+
+  Future<void> copyUrlToClipboard() async {
+    await Clipboard.setData(ClipboardData(text: url));
+    print("Copied '${url}' to clipboard");
   }
 
   static Map<String, Chat>? cache;
@@ -74,7 +85,9 @@ class Chat {
 
   static Future<Chat> add(String id, String key, String name) async {
     var chat = cache!.putIfAbsent(
-        id, () => Chat(id, key, name, DateTime.now(), DateTime.now(), latestEntry: null));
+        id,
+        () => Chat(id, key, name, DateTime.now(), DateTime.now(),
+            latestEntry: null));
     Util.write("chat-${id}", "[]");
     saveAll();
     await FirebaseMessaging.instance.subscribeToTopic(id);
