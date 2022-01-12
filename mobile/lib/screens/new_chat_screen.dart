@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -10,11 +13,20 @@ class NewChatScreen extends StatefulWidget {
   _NewChatScreenState createState() => _NewChatScreenState();
 }
 
+String randomString(int length){
+    const ch = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz';
+    Random r = Random();
+    return String.fromCharCodes(Iterable.generate(
+    length, (_) => ch.codeUnitAt(r.nextInt(ch.length))));
+}
+
 class _NewChatScreenState extends State<NewChatScreen> {
   @override
   Widget build(BuildContext context) {
     var id = Uuid().v1();
-    var key = id.replaceAll("-", "");
+    var key = randomString(32);
+    print(key);
+    print(key.length);
     var name = "New chat";
     Chat.add(id, key, name);
 
