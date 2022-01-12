@@ -40,7 +40,7 @@ class Chat {
   }
 
   get url {
-    var encodedName = base64Encode(utf8.encode(name));
+    var encodedName = base64UrlEncode(utf8.encode(name));
     return "palk://chat?id=${id}&key=${key}&name=${encodedName}";
   }
 
