@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Flutter
 
 class Profile: Codable {
     var id: String
