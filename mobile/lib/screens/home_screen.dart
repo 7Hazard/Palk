@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (Profile.current == null) {
+    if (Profile.current == null || Profile.current!.name == null) {
       return AlertDialog(
         title: Text('What is your name?'),
         content: TextField(
@@ -69,7 +69,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ProfileSettings()),
-              );
+              ).then((value) {
+                setState(() {});
+              });
             },
           ),
           title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [

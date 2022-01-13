@@ -58,29 +58,19 @@ class _ProfileSettingsState extends State<ProfileSettings> {
               TextField(
                 keyboardType: TextInputType.text,
                 controller: usernameController,
-                decoration: InputDecoration(
-                    contentPadding:
-                        EdgeInsets.only(left: 16, top: 25, right: 16),
-                    labelText: 'Enter new username here...',
-                    hintText: ' '),
-              ),
-              Padding(padding: EdgeInsets.only(left: 16, top: 50, right: 16)),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    if (!usernameController.text.isEmpty &&
-                        !regEx.hasMatch(usernameController.text)) {
-                      Profile.current!.name = usernameController.text;
-                    }
-                  });
+                onSubmitted: (value) {
+                  if (value == "")
+                    Profile.current!.name = null; // TODO debug only
+                  else
+                    Profile.current!.name = value;
+                  Profile.current!.save();
+                  setState(() {});
                 },
-                child: Text(
-                  'Save',
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.only(left: 16, top: 25, right: 16),
+                  labelText: 'Change name...',
+                  hintText: ' ',
                 ),
-                style: TextButton.styleFrom(
-                    primary: Colors.white,
-                    backgroundColor: Colors.black,
-                    textStyle: const TextStyle(fontSize: 15)),
               ),
             ],
           ),

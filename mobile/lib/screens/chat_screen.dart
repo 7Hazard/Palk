@@ -139,7 +139,10 @@ class _ChatScreenState extends State<ChatScreen> {
             child: TextField(
               controller: textController,
               textCapitalization: TextCapitalization.sentences,
-              onChanged: (value) {},
+              onSubmitted: (value) {
+                widget.chat.sendMessage(value);
+                textController.clear();
+              },
               decoration: InputDecoration.collapsed(
                 hintText: 'Send a message...',
               ),

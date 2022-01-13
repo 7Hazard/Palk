@@ -106,10 +106,7 @@ class Chat {
       "time": DateTime.now().toUtc().toIso8601String(),
       "user": Profile.current!.object
     });
-    chat.encrypt(data).then((encryptedData) async {
-      var url = Uri.parse('https://palk.7hazard.workers.dev/chat');
-      var response = await http.post(url,
-          body: jsonEncode({"chat": id, "data": encryptedData}));
+    chat.send(data).then((response) async {
       print("Join notification status: ${response.statusCode}");
     });
 
@@ -121,37 +118,42 @@ class Chat {
     Util.delete("chat-${id}");
     saveAll();
     FirebaseMessaging.instance.unsubscribeFromTopic(id);
-    
+
     // Send join event
     var data = jsonEncode({
       "kind": "leave",
       "time": DateTime.now().toUtc().toIso8601String(),
       "user": Profile.current!.object
     });
-    encrypt(data).then((encryptedData) async {
-      var url = Uri.parse('https://palk.7hazard.workers.dev/chat');
-      var response = await http.post(url,
-          body: jsonEncode({"chat": id, "data": encryptedData}));
+    send(data).then((response) {
       print("Leave notification status: ${response.statusCode}");
     });
   }
 
   Future<bool> sendMessage(String message) async {
-    var data = jsonEncode({
-      "kind": "message",
-      "time": DateTime.now().toUtc().toIso8601String(),
-      "message": {
-        "from": Profile.current!.id,
-        "content": message,
-      }
-    });
+    try {
+      var data = jsonEncode({
+        "kind": "message",
+        "time": DateTime.now().toUtc().toIso8601String(),
+        "message": {
+          "from": Profile.current!.id,
+          "content": message,
+        }
+      });
+      var response = await send(data);
+      return response.statusCode == 200;
+    } catch (e) {
+      print("Could not send message: ${e}");
+      return false;
+    }
+  }
 
+  Future<http.Response> send(String data) async {
     var encryptedData = await encrypt(data);
-
+    var body = jsonEncode({"chat": id, "data": encryptedData});
     var url = Uri.parse('https://palk.7hazard.workers.dev/chat');
-    var response = await http.post(url,
-        body: jsonEncode({"chat": id, "data": encryptedData}));
-    return response.statusCode == 200;
+    var response = await http.post(url, body: body);
+    return response;
   }
 
   Future<String> encrypt(String data) async {
