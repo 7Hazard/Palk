@@ -21,31 +21,40 @@ class Profile {
   }();
 
   static Map<String, Profile> cache = HashMap();
-  static Future<Profile> get(String id, {String? name, String? avatar}) async {
+  static Future<Profile> getOrUpdate(String id,
+      {String? name, String? avatar}) async {
     bool save = false;
+    var profile = await get(id);
+    if (profile == null) {
+      print("Creating profile for '${id}'");
+      profile = Profile(id, name: name, avatar: avatar);
+      save = true;
+    }
+    // Check if name has changed
+    if (name != null && profile.name != name) {
+      profile.name = name;
+      save = true;
+    }
+    // Check if avatar has changed
+    if (avatar != null && profile.avatar != avatar) {
+      profile.avatar = avatar;
+      save = true;
+    }
+    if (save) await profile.save();
+    return profile;
+  }
+
+  static Future<Profile?> get(String id) async {
     Profile? profile = cache[id];
     if (profile == null) {
       try {
         var json = jsonDecode(await Util.read("profile-${id}"));
         profile =
             Profile(json["id"], name: json["name"], avatar: json["avatar"]);
-        // Check if name has changed
-        if (name != null && profile.name != name) {
-          profile.name = name;
-          save = true;
-        }
-        // Check if avatar has changed
-        if (avatar != null && profile.avatar != avatar) {
-          profile.avatar = avatar;
-          save = true;
-        }
       } catch (e) {
-        print("No profile by id '${id}', creating");
-        profile = Profile(id, name: name, avatar: avatar);
-        save = true;
+        print("No profile by id '${id}'");
       }
     }
-    if (save) await profile.save();
     return profile;
   }
 

@@ -15,7 +15,7 @@ class Message {
     if (msg == null) return null;
     try {
       return Message(
-        await Profile.get(msg["from"]),
+        await Profile.getOrUpdate(msg["from"]),
         msg["content"],
       );
     } catch (e) {

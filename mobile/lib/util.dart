@@ -35,7 +35,7 @@ class Util {
         case "message":
           var message = data["message"];
           entry.message = Message(
-            await Profile.get(message["from"]),
+            await Profile.getOrUpdate(message["from"]),
             message["content"],
           );
           break;
@@ -43,7 +43,7 @@ class Util {
         case "leave":
           entry.kind = "event";
           var user = data["user"];
-          var profile = await Profile.get(user["id"],
+          var profile = await Profile.getOrUpdate(user["id"],
               name: user["name"], avatar: user["avatar"]);
           entry.event =
               "${profile.nameOrDefault()} ${kind == "join" ? "joined" : "left"}";

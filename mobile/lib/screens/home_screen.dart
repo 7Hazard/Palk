@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/models/chat.dart';
@@ -39,16 +40,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (Profile.current!.name == null) {
+    if (Profile.current == null) {
       return AlertDialog(
-        title: Text('Your name: '),
+        title: Text('What is your name?'),
         content: TextField(
-          decoration: InputDecoration(hintText: 'Enter name here...'),
-          onSubmitted: (value) {
-            setState(() {
-              Profile.current!.name = value;
-              Profile.current!.save();
-            });
+          decoration: InputDecoration(hintText: 'John Doe'),
+          onSubmitted: (value) async {
+            Profile.current = Profile(
+              (await FirebaseMessaging.instance.getToken())!,
+              name: value,
+            );
+            Profile.current!.save();
+            setState(() {});
           },
         ),
       );
