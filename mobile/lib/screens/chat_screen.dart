@@ -4,7 +4,7 @@ import 'package:flutter_chat_ui/models/chat_entry.dart';
 import 'package:flutter_chat_ui/models/profile.dart';
 import 'package:intl/intl.dart';
 
-import 'chat_settings.dart';
+import 'chat_settings_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final Chat chat;

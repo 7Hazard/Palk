@@ -26,23 +26,19 @@ class _ChatSettingsState extends State<ChatSettings> {
             alignment: Alignment.bottomCenter,
             child: new Padding(
               padding:
-                  const EdgeInsets.symmetric(vertical: 50.0, horizontal: 0.0),
+                  const EdgeInsets.symmetric(vertical: 40.0, horizontal: 0.0),
               child: TextButton(
                 onPressed: () {
                   widget.chat.copyUrlToClipboard();
                   Util.snackbar(context, "Copied chat code to clipboard");
                 },
-                child: CircleAvatar(
-                  radius: 82,
-                  backgroundColor: Colors.grey,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: QrImage(
-                      data: widget.chat.url,
-                      version: QrVersions.auto,
-                      size: 100.0, // Determines QR-code size
-                    ),
-                    radius: 200,
+                child: Container(
+                  color: Colors.white,
+                  // padding: EdgeInsets.all(20),
+                  child: QrImage(
+                    data: widget.chat.url,
+                    version: QrVersions.auto,
+                    size: 200.0, // Determines QR-code size
                   ),
                 ),
               ),
@@ -86,9 +82,12 @@ class _ChatSettingsState extends State<ChatSettings> {
               style: TextButton.styleFrom(
                 primary: Colors.red,
               ),
-              child: Text(
-                'Leave',
-                style: TextStyle(fontSize: 16),
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  'Leave',
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
             )
           ]))
