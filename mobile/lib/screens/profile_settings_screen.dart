@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/models/profile.dart';
+import 'package:palk/models/profile.dart';
 
 class ProfileSettings extends StatefulWidget {
   @override

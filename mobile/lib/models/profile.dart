@@ -2,7 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_chat_ui/util.dart';
+import 'package:palk/util.dart';
 
 class Profile {
   final String id;

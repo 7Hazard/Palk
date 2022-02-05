@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/models/chat.dart';
+import 'package:palk/models/chat.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class ScanCodeScreen extends StatefulWidget {
@@ -44,7 +44,7 @@ class _ScanCodeScreenState extends State<ScanCodeScreen> {
             controller.pauseCamera();
             RegExp exp = RegExp(r"palk:\/\/chat\?id=(.*.)&key=(.*)&name=(.*)");
             var match = exp.matchAsPrefix(scanData.code!);
-            if(match != null) {
+            if (match != null) {
               var id = match.group(1)!;
               var key = match.group(2)!;
               var name = String.fromCharCodes(base64Decode(match.group(3)!));
@@ -53,7 +53,7 @@ class _ScanCodeScreenState extends State<ScanCodeScreen> {
                 controller.stopCamera();
                 controller.dispose();
                 Navigator.pop(context);
-              }).catchError((e){
+              }).catchError((e) {
                 controller.resumeCamera();
               });
             } else {

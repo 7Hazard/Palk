@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:cryptography/cryptography.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_chat_ui/models/profile.dart';
-import 'package:flutter_chat_ui/util.dart';
+import 'package:palk/models/profile.dart';
+import 'package:palk/util.dart';
 import 'package:http/http.dart' as http;
 
 import 'chat_entry.dart';

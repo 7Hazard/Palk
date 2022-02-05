@@ -6,23 +6,53 @@
         {
             "label": "Open XCode",
             "type": "shell",
-            "command": "open ios/Runner.xcworkspace",
-            "group": "build"
+            "group": "build",
+            "osx": {
+                "command": "open ios/Runner.xcworkspace"
+            }
         },
         {
             "label": "Build iOS",
             "type": "shell",
-            "command": "flutter build ios",
-            "group": "build"
-        }
+            "group": "build",
+            "osx": {
+                "command": "flutter build ios"
+            }
+        },
         {
             "label": "pod install",
             "type": "shell",
-            "command": "pod install",
             "options": {
                 "cwd": "ios"
             },
-            "group": "build"
+            "group": "build",
+            "osx": {
+                "command": "pod install"
+            }
+        },
+        {
+            "type": "flutter",
+            "command": "flutter",
+            "args": [
+                "build",
+                "apk"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "label": "flutter: flutter build apk",
+            "detail": ""
+        },
+        {
+            "type": "flutter",
+            "command": "flutter",
+            "args": [
+                "build",
+                "ios"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "label": "flutter: flutter build ios",
+            "detail": ""
         }
     ]
 }

@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_chat_ui/screens/home_screen.dart';
+import 'package:palk/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -79,8 +78,7 @@ Future<void> initUniLinks() async {
     print(initialLink);
 
     // Attach a listener to the stream
-    StreamSubscription _sub;
-    _sub = linkStream.listen((String? link) {
+    StreamSubscription _ = linkStream.listen((String? link) {
       // Parse the link and warn the user, if it is not correct
       print(link);
     }, onError: (err) {
