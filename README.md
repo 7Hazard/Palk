@@ -18,3 +18,6 @@ How to run on Android:
 - Open `lib/main.dart`
 - Press the run button  
 ![](https://i.imgur.com/5NIiKO8.png)
+- If it doesn't work to launch through VSCode
+  - Open `mobile/android` with Android Studio
+  - Press the Debug or Run button
