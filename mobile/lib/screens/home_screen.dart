@@ -152,7 +152,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(
                     builder: (_) => ScanCodeScreen(),
                   ),
-                );
+                ).then((value) {
+                  setState(() {});
+                });
               },
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15)),
