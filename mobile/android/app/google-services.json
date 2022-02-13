@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "745496417958",
+    "project_id": "palk-bfab3",
+    "storage_bucket": "palk-bfab3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:745496417958:android:060b4816ae7d00d2e58667",
+        "android_client_info": {
+          "package_name": "com.example.flutter_chat_ui"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "745496417958-tcjhrcqbsjg04i64kadkjolckv2tcd1n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDB3t1Vb8kLrgY47CbKCjcOxuZCG7GisME"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "745496417958-tcjhrcqbsjg04i64kadkjolckv2tcd1n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "745496417958-reuiucjvs0vnvnmoekadhue44f551kue.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "solutions.desati.palk"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:745496417958:android:68be916cc4b630a3e58667",
+        "android_client_info": {
+          "package_name": "solutions.desati.palk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "745496417958-tcjhrcqbsjg04i64kadkjolckv2tcd1n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDB3t1Vb8kLrgY47CbKCjcOxuZCG7GisME"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "745496417958-tcjhrcqbsjg04i64kadkjolckv2tcd1n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "745496417958-reuiucjvs0vnvnmoekadhue44f551kue.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "solutions.desati.palk"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
