@@ -66,11 +66,11 @@ class Chat {
                   DateTime.parse(kv.value["read"]),
                   latestEntry:
                       await ChatEntry.fromObject(kv.value["latestEntry"]))))));
-      return cache!;
     } catch (e) {
       print("Error parsing chats:\n\t${e}");
-      return {};
+      cache = {};
     }
+    return cache!;
   }
 
   static Future<void> saveAll() async {
