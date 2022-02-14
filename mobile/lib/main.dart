@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:palk/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:palk/util.dart';
 import 'package:uni_links/uni_links.dart';
 
 import 'firebase_options.dart';
@@ -55,8 +58,7 @@ Future<void> initFirebase() async {
   print('User granted permission: ${settings.authorizationStatus}');
 
   if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
+    await messaging.setForegroundNotificationPresentationOptions(
       alert: true, // Required to display a heads up notification
       badge: true,
       sound: true,
@@ -65,7 +67,40 @@ Future<void> initFirebase() async {
     String token = (await messaging.getToken())!;
     print('FCM token: ${token}');
     Profile.current = await Profile.get(token);
+
+    // Handle notifications on android
+    if (Platform.isAndroid) {
+      // override FCM notifications
+      // TODO maybe find a better way to customize notifications?
+      await Util.notifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(AndroidNotificationChannel(
+            'fcm_messages', // id
+            'Communications', // title
+            description: "Vital for communications",
+            importance: Importance.none,
+          ));
+
+      // Channel for custom notifications
+      await Util.notifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(Util.notificationChannel);
+
+      FirebaseMessaging.onMessage.listen((message) async {
+        Util.notification(message.data);
+      });
+      FirebaseMessaging.onBackgroundMessage(handleMessage);
+    }
   }
+}
+
+// Only used on Android
+Future<void> handleMessage(RemoteMessage message) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  print("background message ${message.data}");
+  Util.notification(message.data);
 }
 
 Future<void> initUniLinks() async {

@@ -123,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             FloatingActionButton(
+              heroTag: "newChat",
               backgroundColor: Theme.of(context).primaryColor,
               onPressed: () {
                 Navigator.push(
@@ -145,6 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 10), // Padding
 
             FloatingActionButton(
+              heroTag: "scanCode",
               backgroundColor: Theme.of(context).primaryColor,
               onPressed: () {
                 Navigator.push(
@@ -167,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 10), // Padding
 
             FloatingActionButton(
+              heroTag: "fromClipboard",
               backgroundColor: Theme.of(context).primaryColor,
               onPressed: () async {
                 try {
