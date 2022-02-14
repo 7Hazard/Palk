@@ -98,7 +98,6 @@ Future<void> initFirebase() async {
 
 // Only used on Android
 Future<void> handleMessage(RemoteMessage message) async {
-  WidgetsFlutterBinding.ensureInitialized();
   print("background message ${message.data}");
   Util.notification(message.data);
 }
