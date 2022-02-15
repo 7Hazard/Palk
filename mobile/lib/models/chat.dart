@@ -4,8 +4,8 @@ import 'package:cryptography/cryptography.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:palk/models/profile.dart';
-import 'package:palk/util.dart';
 import 'package:http/http.dart' as http;
+import 'package:util/file.dart';
 
 import 'chat_entry.dart';
 
@@ -53,7 +53,7 @@ class Chat {
   static Future<Map<String, Chat>> get all async {
     if (cache != null) return cache!;
     try {
-      var json = await Util.read("chats");
+      var json = await File.read("chats");
       Map<String, dynamic> obj = jsonDecode(json);
       cache = Map.fromEntries(await Future.wait(obj.entries.map((kv) async =>
           MapEntry(
@@ -76,7 +76,7 @@ class Chat {
   static Future<void> saveAll() async {
     var chats = (await all).map((key, value) => MapEntry(key, value.object));
     var json = jsonEncode(chats);
-    await Util.write("chats", json);
+    await File.write("chats", json);
   }
 
   Future<void> save() async {
@@ -96,7 +96,7 @@ class Chat {
         () => Chat(id, key, name, DateTime.now(), DateTime.now(),
             latestEntry: null));
 
-    Util.write("chat-${id}", "[]");
+    File.write("chat-${id}", "[]");
     saveAll();
     FirebaseMessaging.instance.subscribeToTopic(id);
 
@@ -115,7 +115,7 @@ class Chat {
 
   Future<void> remove() async {
     cache?.remove(id);
-    Util.delete("chat-${id}");
+    File.delete("chat-${id}");
     saveAll();
     FirebaseMessaging.instance.unsubscribeFromTopic(id);
 
@@ -185,7 +185,7 @@ class Chat {
 
   Future<List<ChatEntry>> get entries async {
     try {
-      var json = await Util.read("chat-${id}");
+      var json = await File.read("chat-${id}");
       List<dynamic> jsonlist = jsonDecode(json);
       var messages = await Future.wait(
           jsonlist.map((msg) async => (await ChatEntry.fromObject(msg))!));

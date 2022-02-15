@@ -89,7 +89,7 @@ Future<void> initFirebase() async {
           ?.createNotificationChannel(Util.notificationChannel);
 
       FirebaseMessaging.onMessage.listen((message) async {
-        Util.notification(message.data);
+        Util.notification(message.data, displayNotification: true, save: true);
       });
       FirebaseMessaging.onBackgroundMessage(handleMessage);
     }
@@ -99,7 +99,7 @@ Future<void> initFirebase() async {
 // Only used on Android
 Future<void> handleMessage(RemoteMessage message) async {
   print("background message ${message.data}");
-  Util.notification(message.data);
+  Util.notification(message.data, displayNotification: true, save: true);
 }
 
 Future<void> initUniLinks() async {

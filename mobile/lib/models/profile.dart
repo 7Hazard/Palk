@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:palk/util.dart';
+import 'package:util/file.dart';
 
 class Profile {
   final String id;
@@ -48,7 +49,7 @@ class Profile {
     Profile? profile = cache[id];
     if (profile == null) {
       try {
-        var json = jsonDecode(await Util.read("profile-${id}"));
+        var json = jsonDecode(await File.read("profile-${id}"));
         profile =
             Profile(json["id"], name: json["name"], avatar: json["avatar"]);
       } catch (e) {
@@ -61,7 +62,7 @@ class Profile {
   static Profile? current = null;
 
   Future<void> save() async {
-    await Util.write("profile-${id}", json);
+    await File.write("profile-${id}", json);
   }
 
   dynamic get object {
