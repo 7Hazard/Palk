@@ -28,6 +28,9 @@ class Chat {
     this.latestEntry,
   });
 
+  get file => "chat-${id}";
+  static get chatsFile => "chats";
+
   get object {
     return {
       "id": id,
@@ -53,7 +56,7 @@ class Chat {
   static Future<Map<String, Chat>> get all async {
     if (cache != null) return cache!;
     try {
-      var json = await File.read("chats");
+      var json = await File.read(chatsFile);
       Map<String, dynamic> obj = jsonDecode(json);
       cache = Map.fromEntries(await Future.wait(obj.entries.map((kv) async =>
           MapEntry(
@@ -76,10 +79,20 @@ class Chat {
   static Future<void> saveAll() async {
     var chats = (await all).map((key, value) => MapEntry(key, value.object));
     var json = jsonEncode(chats);
-    await File.write("chats", json);
+    await File.write(chatsFile, json);
   }
 
-  Future<void> save() async {
+  Future<void> save({ChatEntry? entry}) async {
+    if (entry != null) {
+      try {
+        var entries = await this.entries;
+        entries.add(entry);
+        await saveEntries(entries);
+      } catch (e) {
+        print("Could not save chat entry:\n\t${e}");
+      }
+    }
+
     await saveAll();
   }
 
@@ -96,7 +109,7 @@ class Chat {
         () => Chat(id, key, name, DateTime.now(), DateTime.now(),
             latestEntry: null));
 
-    File.write("chat-${id}", "[]");
+    File.write(chat.file, "[]");
     saveAll();
     FirebaseMessaging.instance.subscribeToTopic(id);
 
@@ -185,7 +198,7 @@ class Chat {
 
   Future<List<ChatEntry>> get entries async {
     try {
-      var json = await File.read("chat-${id}");
+      var json = await File.read(file);
       List<dynamic> jsonlist = jsonDecode(json);
       var messages = await Future.wait(
           jsonlist.map((msg) async => (await ChatEntry.fromObject(msg))!));
@@ -194,6 +207,12 @@ class Chat {
       print("Could not get messages:\n\t${e}");
       return [];
     }
+  }
+
+  Future<void> saveEntries(List<ChatEntry> entries) async {
+    var objects = entries.map((e) => e.object).toList();
+    var json = jsonEncode(objects);
+    await File.write(file, json);
   }
 
   static var onActivityHandlers = Set<OnMessageFn>();

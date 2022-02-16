@@ -50,10 +50,7 @@ class Util {
 
     chat.onChatEntry(entry);
 
-    if (save) {
-      // TODO save
-      print("TODO: save message");
-    }
+    if (save) chat.save(entry: entry);
 
     if (displayNotification) {
       notifications.show(
