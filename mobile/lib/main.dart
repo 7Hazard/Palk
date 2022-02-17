@@ -16,6 +16,9 @@ import 'models/profile.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // TODO maybe not the proudest of hacks?
+  Util.channel; // Ensures setup of the channel
+
   await initFirebase();
 
   runApp(MyApp());
@@ -88,6 +91,7 @@ Future<void> initFirebase() async {
               AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(Util.notificationChannel);
 
+      // Foreground messages
       FirebaseMessaging.onMessage.listen((message) async {
         Util.notification(message.data, displayNotification: true, save: true);
       });

@@ -12,7 +12,7 @@ import 'models/profile.dart';
 
 class Util {
   static void notification(dynamic args,
-      {bool displayNotification: false, bool save: true}) async {
+      {bool displayNotification: false, bool save: false}) async {
     var chatid = args["chat"];
     var chat = (await Chat.get(chatid))!;
     var data = jsonDecode(await chat.decrypt(args["data"]));
