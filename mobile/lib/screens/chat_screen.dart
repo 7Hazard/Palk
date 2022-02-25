@@ -123,6 +123,13 @@ class _ChatScreenState extends State<ChatScreen> {
   _buildMessageComposer() {
     var textController = TextEditingController();
 
+    void sendMessage(String value) {
+      value = value.trim();
+      if (value.isEmpty) return;
+      widget.chat.sendMessage(value);
+      textController.clear();
+    }
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
       height: 80.0,
@@ -140,8 +147,7 @@ class _ChatScreenState extends State<ChatScreen> {
               controller: textController,
               textCapitalization: TextCapitalization.sentences,
               onSubmitted: (value) {
-                widget.chat.sendMessage(value);
-                textController.clear();
+                sendMessage(value);
               },
               decoration: InputDecoration.collapsed(
                 hintText: 'Send a message...',
@@ -153,8 +159,7 @@ class _ChatScreenState extends State<ChatScreen> {
             iconSize: 25.0,
             color: Theme.of(context).primaryColor,
             onPressed: () {
-              widget.chat.sendMessage(textController.text);
-              textController.clear();
+              sendMessage(textController.text);
             },
           ),
         ],
