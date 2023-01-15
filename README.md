@@ -1,6 +1,6 @@
 Palk
 
-Presentation presented 13/12 - 2021 : https://onedrive.live.com/edit.aspx?resid=A73DAB3A6CD5AAB4!277&ithint=file%2cpptx&authkey=!AOhjbHuYjSlCppY
+Presentation presented 13/12 - 2021 : https://1drv.ms/p/s!ArSq1Ww6qz2nghVUfQMT-MlhRy3X?e=o1cOva
 
 Requirements for Android:
 - [Chocolatey](https://chocolatey.org/install)
