@@ -21,3 +21,10 @@ How to run on Android:
 - If it doesn't work to launch through VSCode
   - Open `mobile/android` with Android Studio
   - Press the Debug or Run button
+
+## Previews
+![image](https://github.com/7Hazard/Palk/assets/16448590/044cd38d-fc27-4b80-8984-81df15ee6370)
+![image](https://github.com/7Hazard/Palk/assets/16448590/6d7be0d8-e642-4e66-986d-4b695c32db84)
+![image](https://github.com/7Hazard/Palk/assets/16448590/daa57a19-d98b-44b3-858c-447eccbf4838)
+![image](https://github.com/7Hazard/Palk/assets/16448590/8c471993-6d29-4880-9362-1bf758559ecf)
+![image](https://github.com/7Hazard/Palk/assets/16448590/f8736248-5c3d-4cd2-9cd7-2326586286a1)
